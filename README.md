@@ -1,1 +1,7 @@
-# ICS Labs, LC3 Assembler and Simulator
+# Introduction to Computing Systems (ICS) Course
+
+Labs (ongoing)
+
+Assembler (ongoing)
+
+Simulation (suspended)
