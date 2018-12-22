@@ -2,6 +2,6 @@
 
 Labs (ongoing)
 
-LC3 Assembler (ongoing)
+Assembler (ongoing)
 
-LC3 Simutation (suspended)
+Simulation (suspended)
