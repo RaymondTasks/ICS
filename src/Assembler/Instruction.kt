@@ -1,8 +1,5 @@
 package Assembler
 
-///**
-// * 指令、伪指令和编译器指令表
-// */
 //internal enum class Type {
 //    inst, pseudo, asminst
 ////    ADD, AND, NOT,
