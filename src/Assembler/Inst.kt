@@ -1,23 +1,22 @@
 package Assembler
 
 //internal enum class Type {
-//    inst, pseudo, asminst
-////    ADD, AND, NOT,
-////    BR, RET, JMP, JSR, JSRR, RTI,
-////    LD, LDR, LDI, LEA, ST, STR, STI,
-////    TRAP,
-////    _START, _END, _FILL, _BLKW, _STRINGZ,
-////    GETC, OUT, PUTS, IN, PUTSP, HALT
+//    ADD, AND, NOT,
+//    BR, RET, JMP, JSR, JSRR, RTI,
+//    LD, LDR, LDI, LEA, ST, STR, STI,
+//    TRAP,
+//    _START, _END, _FILL, _BLKW, _STRINGZ,
+//    GETC, OUT, PUTS, IN, PUTSP, HALT
 //}
 
 /**
  * 字段类型枚举
  */
 internal enum class WordType {
-    Instruction,
-    BR,     //BR指令需要特殊对待
-    PseudoInstruction,
-    AsmInstruction,
+    Inst,
+    BRInst,     //BR指令需要特殊对待
+    TrapInst,
+    PseudoInst,
     Reg,
     Number,
     Label,
@@ -29,18 +28,18 @@ class Instruction(private val asm: Array<String>) {
     var label: String? = null
     var addr = -1
     var length = -1
-    lateinit var symbolTable: HashMap<String, Int>
+//    lateinit var symbolTable: HashMap<String, Int>
 
-    private lateinit var Inst: String
+    var Inst: String
 
     private var is_imm = false
+    private var nzp = -1
     private var SR1 = -1
     private var SR2 = -1
     private var SR = -1
     private var DR = -1
     private var BaseR = -1
-    private var imm = -1
-    private var trapvector = -1
+    var imm = -1
     private var string: String? = null
 
     init {
@@ -48,11 +47,11 @@ class Instruction(private val asm: Array<String>) {
         val wordType = Array<WordType>(asm.size) { i ->
             //指令、伪指令、汇编指令和寄存器不区分大小写
             when (asm[i].toUpperCase()) {
-                in InstTable -> WordType.Instruction
-                in BRTable -> WordType.BR               //BR需要特殊对待
-                in pseudoTable -> WordType.PseudoInstruction
-                in asmInstTable -> WordType.AsmInstruction
-                in regTable -> WordType.Reg
+                in InstOpCodeTable -> WordType.Inst
+                in BRnzpTable -> WordType.BRInst               //BR需要特殊对待
+                in TrapVectorTable -> WordType.TrapInst
+                in PseudoInstTable -> WordType.PseudoInst
+                in RegTable -> WordType.Reg
                 else -> {
                     when (asm[i].first()) {
                         '#' -> WordType.Number
@@ -68,6 +67,98 @@ class Instruction(private val asm: Array<String>) {
             }
         }
         //todo 指令解析
+        var instIndex = -1
+        when (wordType[0]) {
+            WordType.Label -> {
+                label = asm[0]
+                when (wordType[1]) {
+                    WordType.Inst, WordType.BRInst, WordType.TrapInst, WordType.PseudoInst -> {
+                        instIndex = 1
+                        Inst = asm[1].toUpperCase()
+                    }
+                    else -> {
+                        //todo 找不到合法指令
+                        throw Exception()
+                    }
+                }
+            }
+            WordType.Inst, WordType.BRInst, WordType.TrapInst, WordType.PseudoInst -> {
+                instIndex = 1
+                Inst = asm[0].toUpperCase()
+            }
+            else -> {
+                //todo 找不到合法指令
+                throw Exception()
+            }
+        }
+        when (Inst) {
+            in InstOpCodeTable -> {
+                when(Inst){
+                    "ADD","AND"->{
+
+                    }
+                }
+            }
+            in BRnzpTable -> {
+                nzp = BRnzpTable[Inst] as Int
+                Inst = "BR"
+                if (asm.size == instIndex + 2) {
+                    when (wordType[instIndex + 1]) {
+                        WordType.Number -> imm = parseNumber(asm[instIndex + 1])
+                        WordType.Label -> label = asm[instIndex + 1]
+                        else -> {
+                            //todo 非法指令格式
+                            throw Exception()
+                        }
+                    }
+                } else {
+                    //todo 非法指令格式
+                    throw Exception()
+                }
+            }
+            in PseudoInstTable -> {
+                when (Inst) {
+                    ".ORIG" -> {
+                        if (asm.size == instIndex + 1) {
+                            imm = 0x3000
+                        } else if (asm.size == instIndex + 2
+                                && wordType[instIndex + 1] == WordType.Number) {
+                            imm = parseNumber(asm[instIndex + 1])
+                        } else {
+                            //todo 非法指令格式
+                            throw Exception()
+                        }
+                    }
+                    ".FILL", ".BLKW" -> {
+                        if (asm.size == instIndex + 2
+                                && wordType[instIndex + 1] == WordType.Number) {
+                            imm = parseNumber(asm[instIndex + 1])
+                        } else {
+                            //todo 非法指令格式
+                            throw Exception()
+                        }
+                    }
+                    ".STRINGZ" -> {
+                        if (asm.size == instIndex + 2
+                                && wordType[instIndex + 1] == WordType.String) {
+                            string = parseString(asm[instIndex + 1])
+                        } else {
+                            //todo 非法指令格式
+                            throw Exception()
+                        }
+                    }
+                }
+            }
+            in TrapVectorTable -> {
+                imm = TrapVectorTable[Inst] as Int
+                Inst = "TRAP"
+            }
+            else -> {
+                //todo 非法指令格式
+                throw Exception()
+            }
+        }
+
     }
 
     /**
@@ -76,8 +167,8 @@ class Instruction(private val asm: Array<String>) {
     fun toMachineCode(): ShortArray {
         //Inst已经转化成了大写
         when (Inst) {
-            in InstTable -> {
-                var code = (InstTable[Inst] as Int) shl 12
+            in InstOpCodeTable -> {
+                var code = (InstOpCodeTable[Inst] as Int) shl 12
                 when (Inst) {
                     "ADD", "AND" -> {
                         code += DR shl 9
@@ -152,34 +243,35 @@ class Instruction(private val asm: Array<String>) {
                         }
                     }
                     "TRAP" -> {
-                        if (trapvector in 0..255) {
-                            code += trapvector and 0b11_111_111
+                        if (imm in 0..255) {
+                            code += imm and 0b11_111_111
                         } else {
                             //todo 超出立即数表达范围
                             throw Exception()
                         }
                     }
+
                 }
                 return shortArrayOf(code.toShort())
             }
-            in BRTable -> {
-                var code = (BRTable[Inst] as Int) shl 9
-                if (imm in -256..255) {
-                    code += imm and 0b111_111_111
-                } else {
-                    //todo 超出立即数表达范围
-                    throw Exception()
-                }
-                return shortArrayOf(code.toShort())
-            }
-            in pseudoTable -> {
-                var code = 0b1111 shl 12
-                code += (pseudoTable[Inst] as Int) and 0b11_111_111
-                return shortArrayOf(code.toShort())
-            }
-            in asmInstTable -> {
+//            in BRnzpTable -> {
+//                var code = (BRnzpTable[Inst] as Int) shl 9
+//                if (imm in -256..255) {
+//                    code += imm and 0b111_111_111
+//                } else {
+//                    //todo 超出立即数表达范围
+//                    throw Exception()
+//                }
+//                return shortArrayOf(code.toShort())
+//            }
+//            in TrapVectorTable -> {
+//                var code = 0b1111 shl 12
+//                code += (TrapVectorTable[Inst] as Int) and 0b11_111_111
+//                return shortArrayOf(code.toShort())
+//            }
+            in PseudoInstTable -> {
                 when (Inst) {
-                    ".START", ".END" -> {
+                    ".ORIG", ".END" -> {
                         return shortArrayOf()
                     }
                     ".FILL" -> {
@@ -194,16 +286,33 @@ class Instruction(private val asm: Array<String>) {
                         if (imm >= 0) {
                             return ShortArray(imm) { 0 }
                         } else {
+                            //todo 不能为负数
                             throw Exception()
                         }
                     }
                     ".STRINGZ" -> {
-                        return ShortArray(imm) { i ->
-                            string!![i].toShort()
+                        return ShortArray(string!!.length) { i ->
+                            if (i < string!!.length) {
+                                string!![i].toShort()
+                            } else {
+                                0
+                            }
                         }
                     }
                 }
 
+            }
+            else -> {
+                if (Inst == "BR") {
+                    var code = nzp shl 9
+                    if (imm in -256..255) {
+                        code += imm and 0b111_111_111
+                    } else {
+                        //todo 超出立即数表达范围
+                        throw Exception()
+                    }
+                    return shortArrayOf(code.toShort())
+                }
             }
 
         }
@@ -222,11 +331,11 @@ internal fun parseString(str: String): String {
 }
 
 //指令与操作码对照表
-internal val InstTable = hashMapOf(
+internal val InstOpCodeTable = hashMapOf(
         Pair("ADD", 0b0001),
         Pair("AND", 0b0101),
         Pair("NOT", 0b1001),
-//        Pair("BR", 0b0000), //BR特殊对待
+//        Pair("BRInst", 0b0000), //BR特殊对待
         Pair("RET", 0b1100),
         Pair("JMP", 0b1100),
         Pair("JSR", 0b0100),
@@ -243,7 +352,7 @@ internal val InstTable = hashMapOf(
 )
 
 //BR指令与nzp对照表
-internal val BRTable = hashMapOf(
+internal val BRnzpTable = hashMapOf(
         Pair("BR", 0b000),
         Pair("BRN", 0b100),
         Pair("BRZ", 0b010),
@@ -263,7 +372,7 @@ internal val BRTable = hashMapOf(
 )
 
 //伪指令与TRAP vector对照表
-internal val pseudoTable = hashMapOf(
+internal val TrapVectorTable = hashMapOf(
         Pair("GETC", 0x20),
         Pair("OUT", 0x21),
         Pair("PUTS", 0x22),
@@ -273,7 +382,7 @@ internal val pseudoTable = hashMapOf(
 )
 
 //寄存器对照表
-internal val regTable = hashMapOf(
+internal val RegTable = hashMapOf(
         Pair("R0", 0),
         Pair("R1", 1),
         Pair("R2", 2),
@@ -285,15 +394,11 @@ internal val regTable = hashMapOf(
 )
 
 //汇编器指令枚举
-internal enum class asmInstType {
-    _START, _END, _FILL, _BLKW, _STRINGZ
-}
+//internal enum class asmInstType {
+//    _START, _END, _FILL, _BLKW, _STRINGZ
+//}
 
 //汇编器指令表
-internal val asmInstTable = hashMapOf(
-        Pair(".STRAT", asmInstType._START),
-        Pair(".END", asmInstType._END),
-        Pair(".FILL", asmInstType._FILL),
-        Pair(".BLKW", asmInstType._BLKW),
-        Pair(".STRINGZ", asmInstType._STRINGZ)
+internal val PseudoInstTable = hashSetOf(
+        ".ORIG", ".END", ".FILL", ".BLKW", ".STRINGZ"
 )
