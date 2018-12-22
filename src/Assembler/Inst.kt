@@ -97,6 +97,9 @@ class Instruction(private val asm: Array<String>) {
                     "ADD","AND"->{
 
                     }
+                    "NOT"->{
+
+                    }
                 }
             }
             in BRnzpTable -> {
