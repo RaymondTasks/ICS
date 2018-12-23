@@ -23,7 +23,9 @@ internal enum class WordType {
     String,
 }
 
-class Instruction(private val asm: Array<String>) {
+class Instruction(private val asm: Array<String>, val originLines: Int) {
+
+    lateinit var originAsm: Array<String>
 
     var addrLabel: String? = null       //指令前的地址label
     var addr = -1                       //这条指令的开始地址
@@ -43,6 +45,8 @@ class Instruction(private val asm: Array<String>) {
     private var label: String? = null   //指令中包含的label
 
     init {
+        originAsm = asm.copyOf()
+        
         //分析各个字段的类型
         val wordType = Array<WordType>(asm.size) { i ->
             //指令、伪指令、汇编指令和寄存器不区分大小写
@@ -525,7 +529,7 @@ internal val BRnzpTable = hashMapOf(
         Pair("BRPZN", 0b111)
 )
 
-//伪指令与TRAP vector对照表
+//TRAP指令与TRAP vector对照表
 internal val TrapVectorTable = hashMapOf(
         Pair("GETC", 0x20),
         Pair("OUT", 0x21),
