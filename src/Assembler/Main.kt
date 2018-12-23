@@ -95,39 +95,32 @@ fun format(asm: String): ArrayList<Instruction> {
  * 获得开始地址
  */
 fun getStartAddr(insts: ArrayList<Instruction>): Int {
-    var startIndex = -1
-    var endIndex = -1
-    for (i in insts.indices) {
-        if (insts[i].Inst == ".ORIG") {
-            if (startIndex == -1) {
-                startIndex = i
-            } else {
-                //todo 出现了两个.ORIG
-                throw Exception()
-            }
-        }
-        if (insts[i].Inst == ".END") {
-            if (endIndex == -1) {
-                endIndex = i + 1
-            } else {
-                //todo 出现了两个.END
-                throw Exception()
-            }
-        }
+    val startIndex1 = insts.indexOfFirst {
+        it.Inst == ".ORIG"
     }
-    if (startIndex != -1 && endIndex != -1) {
-        val startAddr = insts[startIndex].imm
-        for (i in 0 until startIndex) {
-            insts.removeAt(i)
-        }
-        for (i in endIndex until insts.size) {
-            insts.removeAt(i)
-        }
-        return startAddr
-    } else {
-        //todo .ORIG和.END不闭合
-        throw Exception()
+    val startIndex2 = insts.indexOfLast {
+        it.Inst == ".ORIG"
     }
+    if (startIndex1 == -1 || startIndex1 != startIndex2) {
+        return -1
+    }
+    val endIndex1 = insts.indexOfLast {
+        it.Inst == ".END"
+    }
+    val endIndex2 = insts.indexOfFirst {
+        it.Inst == ".END"
+    }
+    if (endIndex1 == -1 || endIndex1 != endIndex2) {
+        return -1
+    }
+    val ret = insts[startIndex1].imm
+    while (insts.size > endIndex1) {
+        insts.removeAt(insts.size - 1)
+    }
+    for (i in 0..startIndex1) {
+        insts.removeAt(0)
+    }
+    return ret
 }
 
 /**
@@ -160,7 +153,7 @@ fun creatSymbolTable(insts: ArrayList<Instruction>, start: Int): HashMap<String,
                 //todo 不存在的label
                 throw Exception()
             } else {
-                it.labelAddr = labelAddr
+                it.imm = labelAddr
             }
         }
     }
