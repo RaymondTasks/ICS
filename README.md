@@ -2,6 +2,6 @@
 
 Labs (ongoing)
 
-Assembler (ongoing)
+Assembler (completed)
 
 Simulation (suspended)
