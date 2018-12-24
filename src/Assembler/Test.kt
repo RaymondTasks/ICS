@@ -1,7 +1,7 @@
 package Assembler
 
 fun main(args:Array<String>){
-//    regexTest()
+    regexTest()
 }
 
 fun regexTest() {

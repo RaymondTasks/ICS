@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a1607614-90c7-4949-96dd-685e5dfbcceb" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/Assembler/AssemblyException.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Assembler/AssemblyException.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Assembler/AssemblyException.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Assembler/Instruction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Assembler/Instruction.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Assembler/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Assembler/Main.kt" afterDir="false" />
     </list>
@@ -16,6 +16,9 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/ICS$Assembler.ic" NAME="Assembler Coverage Results" MODIFIED="1545624851625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+  </component>
+  <component name="CoverageViewManager">
+    <option name="myElementSize" value="241" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="481967715">
@@ -54,77 +57,60 @@
         <counts>
           <entry key="iml" value="5" />
           <entry key="java" value="17927" />
-          <entry key="kt" value="17664" />
+          <entry key="kt" value="17756" />
           <entry key="kts" value="65" />
-          <entry key="txt" value="40" />
+          <entry key="txt" value="65" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="IDEA_MODULE" value="5" />
           <entry key="JAVA" value="17927" />
-          <entry key="Kotlin" value="17729" />
-          <entry key="PLAIN_TEXT" value="40" />
+          <entry key="Kotlin" value="17821" />
+          <entry key="PLAIN_TEXT" value="65" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.67384976">
-      <split-first>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/src/Assembler/Main.kt">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="3660">
-                  <caret line="183" column="38" selection-start-line="183" selection-start-column="38" selection-end-line="183" selection-end-column="38" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/Assembler/Test.kt">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="260">
-                  <caret line="13" column="27" lean-forward="true" selection-start-line="13" selection-start-column="27" selection-end-line="13" selection-end-column="27" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="414">
-                  <caret line="439" column="7" selection-start-line="439" selection-start-column="7" selection-end-line="439" selection-end-column="7" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/Assembler/AssemblyException.kt">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="300">
-                  <caret line="15" column="1" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-first>
-      <split-second>
-        <leaf>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="10740">
-                  <caret line="537" column="47" selection-start-line="537" selection-start-column="44" selection-end-line="537" selection-end-column="52" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-        </leaf>
-      </split-second>
-    </splitter>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Assembler/Main.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1941">
+              <caret line="150" column="40" selection-start-line="150" selection-start-column="30" selection-end-line="150" selection-end-column="40" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Assembler/Test.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <caret column="17" lean-forward="true" selection-start-column="17" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="660">
+              <caret line="402" column="49" lean-forward="true" selection-start-line="402" selection-start-column="49" selection-end-line="402" selection-end-column="49" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/Assembler/AssemblyException.kt">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="200">
+              <caret line="10" column="70" selection-start-line="10" selection-start-column="70" selection-end-line="10" selection-end-column="70" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -164,9 +150,9 @@
         <option value="$PROJECT_DIR$/ICS.iml" />
         <option value="$PROJECT_DIR$/src/Assembler/RegexTest.kts" />
         <option value="$PROJECT_DIR$/src/Assembler/Test.kt" />
-        <option value="$PROJECT_DIR$/src/Assembler/AssemblyException.kt" />
-        <option value="$PROJECT_DIR$/src/Assembler/Main.kt" />
         <option value="$PROJECT_DIR$/src/Assembler/Instruction.kt" />
+        <option value="$PROJECT_DIR$/src/Assembler/Main.kt" />
+        <option value="$PROJECT_DIR$/src/Assembler/AssemblyException.kt" />
       </list>
     </option>
   </component>
@@ -373,7 +359,7 @@
       <workItem from="1545048733879" duration="8473000" />
       <workItem from="1545326271378" duration="5167000" />
       <workItem from="1545399584301" duration="21788000" />
-      <workItem from="1545494948828" duration="42031000" />
+      <workItem from="1545494948828" duration="43133000" />
     </task>
     <task id="LOCAL-00001" summary="partly complete LC3 assembler">
       <created>1545465110412</created>
@@ -424,17 +410,24 @@
       <option name="project" value="LOCAL" />
       <updated>1545639097072</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="update LC3 assembler: add exceptions handling">
+      <created>1545644730486</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1545644730486</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="155195000" />
+    <option name="totallyTimeSpent" value="156297000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.084754795" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.084754795" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="UI Designer" order="3" />
@@ -458,7 +451,7 @@
       <window_info anchor="right" id="Database" order="5" />
       <window_info anchor="right" id="Palette&#9;" order="6" />
       <window_info anchor="right" id="SciView" order="7" />
-      <window_info anchor="right" id="Run" order="8" visible="true" weight="0.13006397" />
+      <window_info active="true" anchor="right" id="Run" order="8" visible="true" weight="0.4760128" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -496,7 +489,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="partly complete LC3 assembler" />
     <MESSAGE value="update LC3 assembler" />
-    <option name="LAST_COMMIT_MESSAGE" value="update LC3 assembler" />
+    <MESSAGE value="update LC3 assembler: add exceptions handling" />
+    <option name="LAST_COMMIT_MESSAGE" value="update LC3 assembler: add exceptions handling" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -601,29 +595,29 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Assembler/Test.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="260">
-          <caret line="13" column="27" lean-forward="true" selection-start-line="13" selection-start-column="27" selection-end-line="13" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Assembler/AssemblyException.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="15" column="1" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="439" column="7" selection-start-line="439" selection-start-column="7" selection-end-line="439" selection-end-column="7" />
+        <state>
+          <caret column="17" lean-forward="true" selection-start-column="17" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Assembler/Main.kt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3660">
-          <caret line="183" column="38" selection-start-line="183" selection-start-column="38" selection-end-line="183" selection-end-column="38" />
+        <state relative-caret-position="1941">
+          <caret line="150" column="40" selection-start-line="150" selection-start-column="30" selection-end-line="150" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="660">
+          <caret line="402" column="49" lean-forward="true" selection-start-line="402" selection-start-column="49" selection-end-line="402" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Assembler/AssemblyException.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="200">
+          <caret line="10" column="70" selection-start-line="10" selection-start-column="70" selection-end-line="10" selection-end-column="70" />
         </state>
       </provider>
     </entry>

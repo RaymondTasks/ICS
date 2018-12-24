@@ -99,12 +99,12 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
                     insts.add(Instruction(str
                             .split(Regex("(\\s*,\\s*)|(\\s+)"))
                             .toTypedArray()
-                            , it, lineNumber))
+                            , it, lineNumber + 1))
                 }
 
             } else {
                 if (b == -1) {
-                    throw AssemblyException(it, lineNumber,
+                    throw AssemblyException(it, lineNumber + 1,
                             "\" not closed")
                 }
 
@@ -114,11 +114,11 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
 
                 //字符串左右要有空格和别的字段隔离
                 if (left.isNotEmpty() && !left.matches(Regex("\\s$"))) {
-                    throw AssemblyException(it, lineNumber,
+                    throw AssemblyException(it, lineNumber + 1,
                             "Illegal instruction format")
                 }
                 if (right.isNotEmpty() && !right.matches(Regex("^\\s"))) {
-                    throw AssemblyException(it, lineNumber,
+                    throw AssemblyException(it, lineNumber + 1,
                             "Illegal instruction format")
                 }
 
@@ -134,7 +134,7 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
                         .split(Regex("(\\s*,\\s*)|(\\s+)"))
                         .toTypedArray())
 
-                insts.add(Instruction(words.toTypedArray(), it, lineNumber))
+                insts.add(Instruction(words.toTypedArray(), it, lineNumber + 1))
 
             }
 
@@ -148,7 +148,7 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
                 insts.add(Instruction(str
                         .split(Regex("(\\s*,\\s*)|(\\s+)"))
                         .toTypedArray()
-                        , it, lineNumber))
+                        , it, lineNumber + 1))
             }
         }
 

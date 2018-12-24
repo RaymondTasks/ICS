@@ -246,10 +246,10 @@ class Instruction(private var asm: Array<String>,
                         && wordType[1] == WordType.Number) {
                     imm = parseNumber(asm[1])
                     if (Inst == ".BLKW") {
-                        if (imm >= 1) {
+                        if (imm in 1..Short.MAX_VALUE) {
                             length = imm
                         } else {
-                            throwIllegalInstructionFormatException()
+                            throwImmediateException(1, Short.MAX_VALUE.toInt())
                         }
                     }
                 } else {
@@ -388,10 +388,10 @@ class Instruction(private var asm: Array<String>,
                         }
                     }
                     ".BLKW" -> {
-                        if (imm > 0) {
+                        if (imm in 1..Short.MAX_VALUE) {
                             return ShortArray(imm) { 0 }
                         } else {
-                            throwImmediateException(0, Short.MAX_VALUE.toInt())
+                            throwImmediateException(1, Short.MAX_VALUE.toInt())
                         }
                     }
                     ".STRINGZ" -> {
@@ -402,14 +402,10 @@ class Instruction(private var asm: Array<String>,
                         tmp.add(0)
                         return tmp.toShortArray()
                     }
-                    ".ORIG" -> {
-                        throw AssemblyException(originalText, originalLineNumber,
-                                "Duplicated .ORIG")
-                    }
-                    ".END" -> {
-                        throw AssemblyException(originalText, originalLineNumber,
-                                "Duplicated .END")
-                    }
+                    ".ORIG" -> throw AssemblyException(originalText, originalLineNumber,
+                            "Duplicated .ORIG")
+                    ".END" -> throw AssemblyException(originalText, originalLineNumber,
+                            "Duplicated .END")
                 }
 
             }

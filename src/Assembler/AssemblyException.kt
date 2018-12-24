@@ -8,7 +8,7 @@ class AssemblyException(private val originalText: String?,
                         private val msg: String) : Exception() {
     override val message: String?
         get() = if (originalLineNumber != null && originalText != null) {
-            "Error: at line $originalLineNumber : $originalText : $msg"
+            "Error at line $originalLineNumber : \"$originalText\"\n\t$msg"
         } else {
             "Error: $msg"
         }
