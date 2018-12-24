@@ -1,15 +1,72 @@
 package Assembler
 
+import java.io.*
+
 /**
  * main函数
  * 汇编选项
- * [-o] [输出路径]
- * [-b] 生成文本形式的二进制码
- * [-h] 生成文本形式的十六进制码
- * [--help] 显示帮助
+ * [-o] 输出路径 默认输出到
  */
-fun maim(args: Array<String>) {
+fun main(args: Array<String>) {
+//    regexTest()
+    when (args.size) {
+        1 -> {
+            if (args[0].startsWith('-')) {
+                println("Illegal parameters")
+            } else {
+                val file = File(args[0])
+                if (!file.exists()) {
+                    println("No input files")
+                } else {
+                    val input = File(args[0])
+                    assemble(input, File(input.parent + "\\" + "program.obj"))
+                }
+            }
+        }
+        3 -> {
+            if (args[0].startsWith('-')
+                    || args[1] != "-o"
+                    || args[2].startsWith('-')) {
+                println("Illegal parameters")
+            } else {
+                val file = File(args[0])
+                if (!file.exists()) {
+                    println("No input files")
+                } else {
+                    assemble(File(args[0]), File(args[2]))
+                }
+            }
+        }
+        else -> {
+            println("Illegal parameters")
+        }
+    }
 
+}
+
+fun assemble(input: File, output: File) {
+    val fin = BufferedReader(FileReader(input))
+    val insts = format(fin.readLines().toTypedArray())
+    val start = creatSymbolTable(insts)
+    val out = DataOutputStream(
+            BufferedOutputStream(
+                    FileOutputStream(output)))
+    generateMachineCode(insts, start).forEach {
+        println(it.toInt().toString(16))
+        out.writeShort(it.toInt())
+    }
+    out.flush()
+}
+
+
+fun regexTest() {
+    println("#-123".matches(Regex("^#\\-?\\d+$")))
+    println("XADf".matches(Regex("^x[\\dA-F]+$", RegexOption.IGNORE_CASE)))
+    "   AdD   R0, r0, #-16; cg  ;27r2263"
+            .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+            .split(Regex("(\\s*,\\s*)|(\\s+)")).forEach {
+                println(it)
+            }
 }
 
 /**
@@ -19,35 +76,35 @@ fun maim(args: Array<String>) {
  * @param asm 未格式化的汇编码
  * @return 指令对象列表
  */
-fun format(asm: String): ArrayList<Instruction> {
+fun format(lines: Array<String>): ArrayList<Instruction> {
     val insts = ArrayList<Instruction>()
 
-    val originalLines = ArrayList<StringBuilder>()
     //按行分割
-    asm.split(Regex("\\n+"))
-            .forEach {
-                originalLines.add(StringBuilder(it))
-            }
+//    val lines = asm.split(Regex("\\n\\s*")).toTypedArray()
+
+//    asm.split(Regex("\\n\\s*")).forEach {
+//        originalLines.add(StringBuilder(it))
+//    }
 
     //生成指令对象
-    originalLines.forEach {
+    lines.forEach {
 
         if (Regex("\\.STRINGZ", RegexOption.IGNORE_CASE) in it) {
-            //存在字符串,需要特殊对待
+            //可能存在字符串,需要特殊对待
             var inString = false       //在字符串中
             var a = -1      //字符串左边界（包括）
             var b = -1      //字符串右边界（不包括）
             //寻找字符串的范围
-            for (i in 0 until it.length) {
+            findStr@ for (i in 0 until it.length) {
                 if (!inString) {
                     when (it[i]) {
-                        ';' -> it.delete(i, it.length)      //去注释
+                        ';' -> break@findStr    //找到注释，跳出
                         '\'', '"' -> {          //字符串内容开始
                             if (a == -1) {
                                 inString = true
                                 a = i
                             } else {
-                                //todo 出现了两个字符串
+                                //todo 字符串闭合错误
                                 throw Exception()
                             }
                         }
@@ -59,29 +116,41 @@ fun format(asm: String): ArrayList<Instruction> {
                     }
                 }
             }
+//            println(a)
+//            println(b)
             if (a == -1 || b == -1) {
                 //todo 字符串未闭合
                 throw Exception()
             }
-            val tmp = ArrayList<String>()
-            tmp.addAll(it.substring(0, a)
+            val words = ArrayList<String>()
+
+            var asmPart = it.substring(0, a)
                     .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-                    .split(Regex("(\\s*,\\s*)|(\\s+)")))
-            tmp.add(it.substring(a, b))
-            tmp.addAll(it.substring(b)
+            if (asmPart != "") {
+                words.addAll(
+                        asmPart.split(Regex("(\\s*,\\s*)|(\\s+)")))
+            }
+
+            words.add(it.substring(a, b))
+
+            asmPart = it.substring(b)
                     .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-                    .split(Regex("(\\s*,\\s*)|(\\s+)")))
-            //todo ???为什么下面这句不能加
-            insts.add(Instruction(tmp.toTypedArray()))
+            if (asmPart != "") {
+                words.addAll(asmPart.split(Regex("(\\s*,\\s*)|(\\s+)")))
+            }
+
+            insts.add(Instruction(words.toTypedArray()))
+
         } else {
             //非.STRINGZ
             //去注释、首位空格
-            it.replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+            val str = it.replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+//            println(str)
             //分割字段
-            if (it.toString() != "") {  //排除空行
+            if (str != "") {  //排除空行
                 //添加一条有效指令
                 insts.add(Instruction(
-                        it.split(Regex("(\\s*,\\s*)|(\\s+)"))
+                        str.split(Regex("(\\s*,\\s*)|(\\s+)"))
                                 .toTypedArray()))
             }
         }
@@ -94,34 +163,36 @@ fun format(asm: String): ArrayList<Instruction> {
  * 获得.ORIG和.END中间的指令
  * 获得开始地址
  */
-fun getStartAddr(insts: ArrayList<Instruction>): Int {
-    val startIndex1 = insts.indexOfFirst {
-        it.Inst == ".ORIG"
-    }
-    val startIndex2 = insts.indexOfLast {
-        it.Inst == ".ORIG"
-    }
-    if (startIndex1 == -1 || startIndex1 != startIndex2) {
-        return -1
-    }
-    val endIndex1 = insts.indexOfLast {
-        it.Inst == ".END"
-    }
-    val endIndex2 = insts.indexOfFirst {
-        it.Inst == ".END"
-    }
-    if (endIndex1 == -1 || endIndex1 != endIndex2) {
-        return -1
-    }
-    val ret = insts[startIndex1].imm
-    while (insts.size > endIndex1) {
-        insts.removeAt(insts.size - 1)
-    }
-    for (i in 0..startIndex1) {
-        insts.removeAt(0)
-    }
-    return ret
-}
+//fun getStartAddr(insts: ArrayList<Instruction>): Int {
+//    val startIndex1 = insts.indexOfFirst {
+//        it.Inst == ".ORIG"
+//    }
+//    val startIndex2 = insts.indexOfLast {
+//        it.Inst == ".ORIG"
+//    }
+//    if (startIndex1 == -1 || startIndex1 != startIndex2) {
+//        return -1
+//    }
+//
+//    val endIndex1 = insts.indexOfLast {
+//        it.Inst == ".END"
+//    }
+//    val endIndex2 = insts.indexOfFirst {
+//        it.Inst == ".END"
+//    }
+//    if (endIndex1 == -1 || endIndex1 != endIndex2) {
+//        return -1
+//    }
+//
+//    val tmp = insts[startIndex1].imm
+//    while (insts.size > endIndex1) {
+//        insts.removeAt(endIndex1)
+//    }
+//    for (i in 0..startIndex1) {
+//        insts.removeAt(0)
+//    }
+//    return tmp
+//}
 
 /**
  * 创建符号链接表
@@ -129,35 +200,59 @@ fun getStartAddr(insts: ArrayList<Instruction>): Int {
  * @param start 第一条指令所在的位置
  * @return 符号链接表
  */
-fun creatSymbolTable(insts: ArrayList<Instruction>, start: Int): HashMap<String, Int> {
+fun creatSymbolTable(insts: ArrayList<Instruction>): Int {
+    val startIndex1 = insts.indexOfFirst {
+        it.Inst == ".ORIG"
+    }
+    val startIndex2 = insts.indexOfLast {
+        it.Inst == ".ORIG"
+    }
+    if (startIndex1 == -1 || startIndex1 != startIndex2) {
+        throw Exception()
+    }
+
+    val endIndex1 = insts.indexOfLast {
+        it.Inst == ".END"
+    }
+    val endIndex2 = insts.indexOfFirst {
+        it.Inst == ".END"
+    }
+    if (endIndex1 == -1 || endIndex1 != endIndex2) {
+        throw Exception()
+    }
+
+    //获得起始地址
+    val start = insts[startIndex1].imm
     var addr = start
+
+    while (insts.size > endIndex1) {
+        insts.removeAt(endIndex1)
+    }
+    for (i in 0..startIndex1) {
+        insts.removeAt(0)
+    }
+
     val table = HashMap<String, Int>()
     insts.forEach {
         it.addr = addr
-        if (it.label != null) {
-            if (it.label in table) {
+        if (it.addrLabel != null) {
+            if (it.addrLabel in table) {
                 //todo label重复错误
                 throw Exception()
             } else {
                 //添加一个label
-                table.put(it.label!!, addr)
+                table[it.addrLabel!!] = addr
             }
         }
         //更新label
         addr += it.length
     }
+
     insts.forEach {
-        if (it.label != null) {
-            val labelAddr = table[it.label!!]
-            if (labelAddr == null) {
-                //todo 不存在的label
-                throw Exception()
-            } else {
-                it.imm = labelAddr
-            }
-        }
+        it.replaceLabel(table)
     }
-    return table
+
+    return start
 }
 
 /**
@@ -165,8 +260,8 @@ fun creatSymbolTable(insts: ArrayList<Instruction>, start: Int): HashMap<String,
  * @param insts 指令对象列表,去除了.START和.END,更新了label
  * @return 机器码序列
  */
-fun generateMachineCode(insts: ArrayList<Instruction>): ArrayList<Short> {
-    val array = ArrayList<Short>()
+fun generateMachineCode(insts: ArrayList<Instruction>, start: Int): ArrayList<Short> {
+    val array = arrayListOf(start.toShort())
     insts.forEach {
         it.toMachineCode().forEach { code ->
             array.add(code)

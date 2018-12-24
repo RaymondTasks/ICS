@@ -18,23 +18,24 @@ internal enum class WordType {
     TrapInst,
     PseudoInst,
     Reg,
+
     Number,
     Label,
     String,
+    Unknown
 }
 
-class Instruction(private val asm: Array<String>, val originLines: Int) {
+class Instruction(private var asm: Array<String>) {
 
-    lateinit var originAsm: Array<String>
+    var originAsm: Array<String>
 
     var addrLabel: String? = null       //指令前的地址label
     var addr = -1                       //这条指令的开始地址
-    var length = -1                     //指令翻译成机器码的长度
+    var length = 1                     //指令翻译成机器码的长度，默认是1，只有.BLKW和.STRINGZ需要更改
 
     var Inst: String                    //指令
 
     private var is_imm = false          //add and是否是立即数型
-    //    private var nzp = -1                //nzp
     private var SR1 = -1                //SR1
     private var SR2 = -1                //SR2
     private var SR = -1                 //SR
@@ -45,28 +46,50 @@ class Instruction(private val asm: Array<String>, val originLines: Int) {
     private var label: String? = null   //指令中包含的label
 
     init {
+        //保存原始指令
         originAsm = asm.copyOf()
-        
+
         //分析各个字段的类型
-        val wordType = Array<WordType>(asm.size) { i ->
-            //指令、伪指令、汇编指令和寄存器不区分大小写
-            when (asm[i].toUpperCase()) {
-                in InstOpCodeTable -> WordType.Inst
-                in BRnzpTable -> WordType.BRInst               //BR需要特殊对待
-                in TrapVectorTable -> WordType.TrapInst
-                in PseudoInstTable -> WordType.PseudoInst
-                in RegTable -> WordType.Reg
+        val wordType = ArrayList<WordType>()
+
+        asm.forEachIndexed { i, s ->
+            when (s.toUpperCase()) {
+                in InstOpCodeTable -> {
+                    asm[i] = s.toUpperCase()
+                    wordType.add(WordType.Inst)
+                }
+                in BRnzpTable -> {
+                    asm[i] = s.toUpperCase()
+                    wordType.add(WordType.BRInst)
+                }
+                in TrapVectorTable -> {
+                    asm[i] = s.toUpperCase()
+                    wordType.add(WordType.TrapInst)
+                }
+                in PseudoInstTable -> {
+                    asm[i] = s.toUpperCase()
+                    wordType.add(WordType.PseudoInst)
+                }
+                in RegTable -> {
+                    asm[i] = s.toUpperCase()
+                    wordType.add(WordType.Reg)
+                }
+
+                //需要进行正则匹配，确定是否合法
                 else -> {
-                    when (asm[i].first()) {
-                        '#' -> WordType.Number
-                        'x', 'X' -> {
-                            //todo 判定数字
-                            WordType.Number
-                            //todo
-                        }
-                        '\'', '"' -> WordType.String
-                        else -> WordType.Label
+                    if (s.matches(Regex("^x[\\dA-F]+$", RegexOption.IGNORE_CASE))) {
+                        wordType.add(WordType.Number)
+                    } else if (s.matches(Regex("^#\\-?\\d+$"))) {
+                        wordType.add(WordType.Number)
+                    } else if ((s.first() == '\'' || s.first() == '"') && s.last() == s.first()) {
+                        wordType.add(WordType.String)
+                    } else if (s.matches(Regex("^[A-Z_]\\w*$", RegexOption.IGNORE_CASE))) {
+                        wordType.add(WordType.Label)
+                    } else {
+                        //todo 非法格式
+                        throw Exception()
                     }
+
                 }
             }
         }
@@ -76,148 +99,16 @@ class Instruction(private val asm: Array<String>, val originLines: Int) {
                     || it == WordType.BRInst || it == WordType.PseudoInst
         }
 
-        if (instIndex != 0 && !(instIndex == 1 && wordType[0] == WordType.Label)) {
-            //todo
-            throw Exception()
-        }
-
-
-        Inst = asm[instIndex].toUpperCase()
-        when (Inst) {
-            "ADD", "AND" -> {
-                if (asm.size == instIndex + 4
-                        && wordType[instIndex + 1] == WordType.Reg
-                        && wordType[instIndex + 2] == WordType.Reg) {
-                    DR = RegTable[asm[instIndex + 1].toUpperCase()] as Int
-                    SR1 = RegTable[asm[instIndex + 2].toUpperCase()] as Int
-                    when (wordType[instIndex + 3]) {
-                        WordType.Reg -> {
-                            is_imm = false
-                            SR2 = RegTable[asm[instIndex + 3].toUpperCase()] as Int
-                        }
-                        WordType.Number -> {
-                            is_imm = true
-                            imm = parseNumber(asm[instIndex + 3])
-                        }
-                        else -> throw Exception()
-                    }
-                } else {
-                    //todo
-                    throw Exception()
-                }
+        when (instIndex) {
+            0 -> {
+                //do nothing
             }
-            "NOT" -> {
-                if (asm.size == instIndex + 3
-                        && wordType[instIndex + 1] == WordType.Reg
-                        && wordType[instIndex + 2] == WordType.Reg) {
-                    DR = RegTable[asm[instIndex + 1].toUpperCase()] as Int
-                    SR1 = RegTable[asm[instIndex + 2].toUpperCase()] as Int
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "RET" -> {
-                if (asm.size == instIndex + 1) {
-                    Inst = "JMP"
-                    BaseR = 7
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "RTI", ".END" -> {
-                if (asm.size != instIndex + 1) {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "GETC", "OUT", "PUTS", "IN", "PUTSP", "HALT" -> {
-                if (asm.size == instIndex + 1) {
-                    Inst = "TRAP"
-                    imm = TrapVectorTable[asm[instIndex].toUpperCase()] as Int
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "JSR", in BRnzpTable -> {
-                if (asm.size == instIndex + 2) {
-                    when (wordType[instIndex + 1]) {
-                        WordType.Number -> imm = parseNumber(asm[instIndex + 1])
-                        WordType.Label -> label = asm[instIndex + 1]
-                        else -> throw  Exception()
-                    }
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "JMP", "JSRR" -> {
-                if (asm.size == instIndex + 2
-                        && wordType[instIndex + 1] == WordType.Reg) {
-                    BaseR = RegTable[asm[instIndex + 1].toUpperCase()] as Int
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "LD", "LDI", "ST", "STI", "LEA" -> {
-                if (asm.size == instIndex + 3
-                        && wordType[instIndex + 1] == WordType.Reg) {
-                    when (Inst) {
-                        "LD", "LDI", "LEA" -> DR = RegTable[asm[instIndex + 1].toUpperCase()] as Int
-                        "ST", "STI" -> SR = RegTable[asm[instIndex + 1].toUpperCase()] as Int
-                    }
-                    when (wordType[instIndex + 2]) {
-                        WordType.Number -> imm = parseNumber(asm[instIndex + 2])
-                        WordType.Label -> label = asm[instIndex + 2]
-                        else -> throw Exception()
-                    }
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "LDR", "STR" -> {
-                if (asm.size == instIndex + 4
-                        && wordType[instIndex + 1] == WordType.Reg
-                        && wordType[instIndex + 2] == WordType.Reg
-                        && wordType[instIndex + 3] == WordType.Number) {
-                    when (Inst) {
-                        "LDR" -> DR = RegTable[asm[instIndex + 1].toUpperCase()] as Int
-                        "STR" -> SR = RegTable[asm[instIndex + 1].toUpperCase()] as Int
-                    }
-                    BaseR = RegTable[asm[instIndex + 2].toUpperCase()] as Int
-                    imm = parseNumber(asm[instIndex + 3])
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            "TRAP", ".FILL", ".BLKW" -> {
-                if (asm.size == instIndex + 2
-                        && wordType[instIndex + 1] == WordType.Number) {
-                    imm = parseNumber(asm[instIndex + 1])
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            ".ORIG" -> {
-                if (asm.size == instIndex + 1) {
-                    imm = 0x3000
-                } else if (asm.size == instIndex + 2 && wordType[instIndex + 1] == WordType.Number) {
-                    imm = parseNumber(asm[instIndex + 1])
-                } else {
-                    //todo
-                    throw Exception()
-                }
-            }
-            ".STRINGZ" -> {
-                if (asm.size == instIndex + 2
-                        && wordType[instIndex + 1] == WordType.String) {
-                    string = asm[instIndex + 1].substring(1, asm[instIndex + 1].length - 1)
+            1 -> {
+                if (wordType[0] == WordType.Label) {
+                    //移除label，方便下面的解析
+                    addrLabel = asm[0]
+                    wordType.removeAt(0)
+                    asm = asm.copyOfRange(1, asm.size)
                 } else {
                     //todo
                     throw Exception()
@@ -229,102 +120,171 @@ class Instruction(private val asm: Array<String>, val originLines: Int) {
             }
         }
 
+        Inst = asm[0]
+        when (Inst) {
 
-        //todo 指令解析
-//        var instIndex = -1
-//        when (wordType[0]) {
-//            WordType.Label -> {
-//                label = asm[0]
-//                when (wordType[1]) {
-//                    WordType.Inst, WordType.BRInst, WordType.TrapInst, WordType.PseudoInst -> {
-//                        instIndex = 1
-//                        Inst = asm[1].toUpperCase()
-//                    }
-//                    else -> {
-//                        //todo 找不到合法指令
-//                        throw Exception()
-//                    }
-//                }
-//            }
-//            WordType.Inst, WordType.BRInst, WordType.TrapInst, WordType.PseudoInst -> {
-//                instIndex = 1
-//                Inst = asm[0].toUpperCase()
-//            }
-//            else -> {
-//                //todo 找不到合法指令
-//                throw Exception()
-//            }
-//        }
-//        when (Inst) {
-//            in InstOpCodeTable -> {
-//                when (Inst) {
-//                    "ADD", "AND" -> {
-//
-//                    }
-//                    "NOT" -> {
-//
-//                    }
-//                }
-//            }
-//            in BRnzpTable -> {
-//                nzp = BRnzpTable[Inst] as Int
-//                Inst = "BR"
-//                if (asm.size == instIndex + 2) {
-//                    when (wordType[instIndex + 1]) {
-//                        WordType.Number -> imm = parseNumber(asm[instIndex + 1])
-//                        WordType.Label -> label = asm[instIndex + 1]
-//                        else -> {
-//                            //todo 非法指令格式
-//                            throw Exception()
-//                        }
-//                    }
-//                } else {
-//                    //todo 非法指令格式
-//                    throw Exception()
-//                }
-//            }
-//            in PseudoInstTable -> {
-//                when (Inst) {
-//                    ".ORIG" -> {
-//                        if (asm.size == instIndex + 1) {
-//                            imm = 0x3000
-//                        } else if (asm.size == instIndex + 2
-//                                && wordType[instIndex + 1] == WordType.Number) {
-//                            imm = parseNumber(asm[instIndex + 1])
-//                        } else {
-//                            //todo 非法指令格式
-//                            throw Exception()
-//                        }
-//                    }
-//                    ".FILL", ".BLKW" -> {
-//                        if (asm.size == instIndex + 2
-//                                && wordType[instIndex + 1] == WordType.Number) {
-//                            imm = parseNumber(asm[instIndex + 1])
-//                        } else {
-//                            //todo 非法指令格式
-//                            throw Exception()
-//                        }
-//                    }
-//                    ".STRINGZ" -> {
-//                        if (asm.size == instIndex + 2
-//                                && wordType[instIndex + 1] == WordType.String) {
-//                            string = parseString(asm[instIndex + 1])
-//                        } else {
-//                            //todo 非法指令格式
-//                            throw Exception()
-//                        }
-//                    }
-//                }
-//            }
-//            in TrapVectorTable -> {
-//                imm = TrapVectorTable[Inst] as Int
-//                Inst = "TRAP"
-//            }
-//            else -> {
-//                //todo 非法指令格式
-//                throw Exception()
-//            }
-//        }
+            in TrapVectorTable -> {
+                if (asm.size == 1) {
+                    Inst = "TRAP"
+                    imm = TrapVectorTable[asm[0]] as Int
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "ADD", "AND" -> {
+                if (asm.size == 4
+                        && wordType[1] == WordType.Reg
+                        && wordType[2] == WordType.Reg) {
+                    DR = RegTable[asm[1]] as Int
+                    SR1 = RegTable[asm[2]] as Int
+                    when (wordType[3]) {
+                        WordType.Reg -> {
+                            is_imm = false
+                            SR2 = RegTable[asm[3]] as Int
+                        }
+                        WordType.Number -> {
+                            is_imm = true
+                            imm = parseNumber(asm[3])
+                        }
+                        else -> throw Exception()
+                    }
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "NOT" -> {
+                if (asm.size == 3
+                        && wordType[1] == WordType.Reg
+                        && wordType[2] == WordType.Reg) {
+                    DR = RegTable[asm[1]] as Int
+                    SR1 = RegTable[asm[2]] as Int
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "RET" -> {
+                if (asm.size == 1) {
+                    Inst = "JMP"
+                    BaseR = 7
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "RTI", ".END" -> {
+                if (asm.size != 1) {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "JSR", in BRnzpTable -> {
+                if (asm.size == 2) {
+                    when (wordType[1]) {
+                        WordType.Number -> imm = parseNumber(asm[1])
+                        WordType.Label -> label = asm[1]
+                        else -> throw  Exception()
+                    }
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "JMP", "JSRR" -> {
+                if (asm.size == 2
+                        && wordType[1] == WordType.Reg) {
+                    BaseR = RegTable[asm[1]] as Int
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "LD", "LDI", "ST", "STI", "LEA" -> {
+                if (asm.size == 3
+                        && wordType[1] == WordType.Reg) {
+                    when (Inst) {
+                        "LD", "LDI", "LEA" -> DR = RegTable[asm[1]] as Int
+                        "ST", "STI" -> SR = RegTable[asm[1]] as Int
+                    }
+                    when (wordType[2]) {
+                        WordType.Number -> imm = parseNumber(asm[2])
+                        WordType.Label -> label = asm[2]
+                        else -> throw Exception()
+                    }
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "LDR", "STR" -> {
+                if (asm.size == 4
+                        && wordType[1] == WordType.Reg
+                        && wordType[2] == WordType.Reg
+                        && wordType[3] == WordType.Number) {
+                    when (Inst) {
+                        "LDR" -> DR = RegTable[asm[1]] as Int
+                        "STR" -> SR = RegTable[asm[1]] as Int
+                    }
+                    BaseR = RegTable[asm[2]] as Int
+                    imm = parseNumber(asm[3])
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+
+            "TRAP", ".FILL", ".BLKW" -> {
+                if (asm.size == 2
+                        && wordType[1] == WordType.Number) {
+                    imm = parseNumber(asm[1])
+                    if (Inst == ".BLKW") {
+                        if (imm >= 1) {
+                            length = imm
+                        } else {
+                            //todo
+                            throw Exception()
+                        }
+                    }
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+            ".ORIG" -> {
+                if (asm.size == 1) {
+                    imm = 0x3000
+                } else if (asm.size == 2 && wordType[1] == WordType.Number) {
+                    imm = parseNumber(asm[1])
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+            ".STRINGZ" -> {
+                if (asm.size == 2
+                        && wordType[1] == WordType.String) {
+                    string = asm[1].substring(1, asm[1].length - 1)
+                    length = string!!.length + 1
+                } else {
+                    //todo
+                    throw Exception()
+                }
+            }
+            else -> {
+                //todo
+                throw Exception()
+            }
+        }
 
     }
 
@@ -355,6 +315,7 @@ class Instruction(private val asm: Array<String>, val originLines: Int) {
                     "NOT" -> {
                         code += DR shl 9
                         code += SR1 shl 6
+                        code += 0b111111
                     }
                     "JMP", "RET", "JSRR" -> {
                         code += BaseR shl 6
@@ -433,9 +394,6 @@ class Instruction(private val asm: Array<String>, val originLines: Int) {
             }
             in PseudoInstTable -> {
                 when (Inst) {
-                    ".ORIG", ".END" -> {
-                        return shortArrayOf()
-                    }
                     ".FILL" -> {
                         if (imm in -32768..32767) {
                             return shortArrayOf(imm.toShort())
@@ -453,40 +411,60 @@ class Instruction(private val asm: Array<String>, val originLines: Int) {
                         }
                     }
                     ".STRINGZ" -> {
-                        return ShortArray(string!!.length) { i ->
-                            if (i < string!!.length) {
-                                string!![i].toShort()
-                            } else {
-                                0
-                            }
+                        val tmp = ArrayList<Short>()
+                        string!!.forEach { c ->
+                            tmp.add(c.toShort())
                         }
+                        tmp.add(0)
+                        return tmp.toShortArray()
+                    }
+                    else -> {
+                        //todo 不能出现 .ORIG 和 .END
+                        throw Exception()
                     }
                 }
 
             }
-//            else -> {
-//                if (Inst == "BR") {
-//                    var code = nzp shl 9
-//                    if (imm in -256..255) {
-//                        code += imm and 0b111_111_111
-//                    } else {
-//                        //todo 超出立即数表达范围
-//                        throw Exception()
-//                    }
-//                    return shortArrayOf(code.toShort())
-//                }
-//            }
-
+            else -> {
+                //todo 非法指令
+                throw Exception()
+            }
         }
-        //todo 非法指令
-        throw Exception()
+
+    }
+
+    /**
+     * 替换指令中的符号为 PCoffset
+     */
+    fun replaceLabel(symbolTable: HashMap<String, Int>) {
+        if (label != null) {
+            val tmp = symbolTable[label!!]
+            if (tmp != null) {
+                imm = tmp - (addr + 1)
+            } else {
+                //todo 不存在的label
+                throw Exception()
+            }
+        }
     }
 
 }
 
-internal fun parseNumber(str: String): Int {
-
+/**
+ * 解析数字
+ */
+internal fun parseNumber(str: String) = when (str.first()) {
+    '#' -> {
+        str.substring(1).toInt(10)
+    }
+    'x', 'X' -> {
+        str.substring(1).toInt(16).toShort().toInt()
+    }
+    else -> {
+        throw Exception()
+    }
 }
+
 
 //指令与操作码对照表
 internal val InstOpCodeTable = hashMapOf(

@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="a1607614-90c7-4949-96dd-685e5dfbcceb" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Assembler/Inst.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Assembler/Inst.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ICS.iml" beforeDir="false" afterPath="$PROJECT_DIR$/ICS.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Assembler/Inst.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Assembler/Instruction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Assembler/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/Assembler/Main.kt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -11,6 +13,9 @@
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageDataManager">
+    <SUITE FILE_PATH="coverage/ICS$Assembler.ic" NAME="Assembler Coverage Results" MODIFIED="1545624851625" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="481967715">
@@ -27,72 +32,74 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="iml" value="3" />
+          <entry key="hex" value="1" />
+          <entry key="iml" value="4" />
           <entry key="java" value="11" />
-          <entry key="kt" value="3" />
+          <entry key="kt" value="10" />
           <entry key="md" value="1" />
+          <entry key="xml" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="IDEA_MODULE" value="3" />
+          <entry key="IDEA_MODULE" value="4" />
           <entry key="JAVA" value="11" />
-          <entry key="Kotlin" value="3" />
+          <entry key="Kotlin" value="10" />
           <entry key="Markdown" value="1" />
+          <entry key="PLAIN_TEXT" value="1" />
+          <entry key="XML" value="8" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
+          <entry key="iml" value="5" />
           <entry key="java" value="17927" />
-          <entry key="kt" value="12694" />
+          <entry key="kt" value="15534" />
+          <entry key="kts" value="65" />
           <entry key="txt" value="40" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
+          <entry key="IDEA_MODULE" value="5" />
           <entry key="JAVA" value="17927" />
-          <entry key="Kotlin" value="12694" />
+          <entry key="Kotlin" value="15599" />
           <entry key="PLAIN_TEXT" value="40" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.43735763">
+    <splitter split-orientation="horizontal" split-proportion="0.7298938">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file pinned="false" current-in-tab="false">
+          <file pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/Assembler/Main.kt">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="341">
-                  <caret line="155" column="22" selection-start-line="155" selection-start-column="22" selection-end-line="155" selection-end-column="22" />
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/src/Assembler/Inst.kt">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="6761">
-                  <caret line="488" column="1" lean-forward="true" selection-start-line="488" selection-start-column="1" selection-end-line="488" selection-end-column="1" />
+                <state relative-caret-position="161">
+                  <caret line="11" column="22" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="22" />
                 </state>
               </provider>
             </entry>
           </file>
           <file pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/README.md">
-              <provider selected="true" editor-type-id="text-editor" />
+            <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
+              <provider selected="true" editor-type-id="text-editor">
+                <state relative-caret-position="719">
+                  <caret line="317" column="40" selection-start-line="317" selection-start-column="40" selection-end-line="317" selection-end-column="40" />
+                </state>
+              </provider>
             </entry>
           </file>
         </leaf>
       </split-first>
       <split-second>
-        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+        <leaf>
           <file pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/src/Assembler/Inst.kt">
+            <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="300">
-                  <caret line="48" column="8" selection-start-line="48" selection-start-column="8" selection-end-line="48" selection-end-column="8" />
+                <state relative-caret-position="707">
+                  <caret line="533" column="47" selection-start-line="533" selection-start-column="44" selection-end-line="533" selection-end-column="52" />
                 </state>
               </provider>
             </entry>
@@ -113,6 +120,7 @@
     <findStrings>
       <find>n</find>
       <find>p</find>
+      <find>instIndex +</find>
     </findStrings>
     <replaceStrings>
       <replace>P</replace>
@@ -130,9 +138,12 @@
         <option value="$PROJECT_DIR$/src/Simulator/Simulator.java" />
         <option value="$PROJECT_DIR$/src/lab1test/Main.java" />
         <option value="$PROJECT_DIR$/src/Assembler/Main.java" />
+        <option value="$PROJECT_DIR$/src/Assembler/Inst.kt" />
+        <option value="$PROJECT_DIR$/src/Assembler/regexTest.kts" />
+        <option value="$PROJECT_DIR$/ICS.iml" />
+        <option value="$PROJECT_DIR$/src/Assembler/RegexTest.kts" />
         <option value="$PROJECT_DIR$/src/Assembler/Instruction.kt" />
         <option value="$PROJECT_DIR$/src/Assembler/Main.kt" />
-        <option value="$PROJECT_DIR$/src/Assembler/Inst.kt" />
       </list>
     </option>
   </component>
@@ -153,8 +164,8 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
-    <option name="x" value="953" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="412" />
     <option name="width" value="974" />
     <option name="height" value="1057" />
   </component>
@@ -203,6 +214,11 @@
             <id>Threading issuesJava</id>
           </State>
         </expanded-state>
+        <selected-state>
+          <State>
+            <id>Angular</id>
+          </State>
+        </selected-state>
       </profile-state>
     </entry>
   </component>
@@ -218,6 +234,22 @@
             <path>
               <item name="ICS" type="b2602c69:ProjectViewProjectNode" />
               <item name="ICS" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ICS" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ICS" type="462c0819:PsiDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ICS" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ICS" type="462c0819:PsiDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+              <item name="libraries" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ICS" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ICS" type="462c0819:PsiDirectoryNode" />
+              <item name="labs" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="ICS" type="b2602c69:ProjectViewProjectNode" />
@@ -241,13 +273,18 @@
     <property name="JavaScriptWeakerCompletionTypeGuess" value="true" />
     <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file://D:/Codes/ICS/src/Assembler/Instruction/Instruction.java&#10;binarygcd&#9;PSI&#9;JAVA://java.math.MutableBigInteger#binaryGCD&#10;gcd&#9;PSI&#9;JAVA://javax.swing.table.DefaultTableModel#gcd" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$KOTLIN_BUNDLED$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="Settings.JavaScript.Bower" />
+    <property name="project.structure.last.edited" value="SDKs" />
+    <property name="project.structure.proportion" value="0.15" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Codes\ICS\src\Assembler" />
+      <recent name="D:\Codes\ICS\src\Test" />
       <recent name="D:\Codes\ICS\src" />
       <recent name="D:\Codes\ICS\Assembler" />
     </key>
@@ -264,6 +301,21 @@
       </list>
     </option>
   </component>
+  <component name="RunManager">
+    <configuration name="Assembler" type="JetRunConfigurationType" factoryName="Kotlin">
+      <module name="ICS" />
+      <option name="VM_PARAMETERS" value="" />
+      <option name="PROGRAM_PARAMETERS" value="D:\Codes\ICS\labs\lab1\program.asm" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" value="Assembler.MainKt" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="a1607614-90c7-4949-96dd-685e5dfbcceb" name="Default Changelist" comment="" />
@@ -278,7 +330,7 @@
       <workItem from="1545048733879" duration="8473000" />
       <workItem from="1545326271378" duration="5167000" />
       <workItem from="1545399584301" duration="21788000" />
-      <workItem from="1545494948828" duration="13482000" />
+      <workItem from="1545494948828" duration="32560000" />
     </task>
     <task id="LOCAL-00001" summary="partly complete LC3 assembler">
       <created>1545465110412</created>
@@ -319,18 +371,18 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="126646000" />
+    <option name="totallyTimeSpent" value="145724000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1066" extended-state="7" />
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.06396589" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.0804904" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="UI Designer" order="3" />
       <window_info id="Favorites" order="4" side_tool="true" />
-      <window_info anchor="bottom" id="Messages" order="0" weight="0.32919255" />
+      <window_info anchor="bottom" id="Messages" order="0" weight="0.2792696" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.32975295" />
       <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
@@ -338,17 +390,18 @@
       <window_info anchor="bottom" id="TODO" order="5" />
       <window_info anchor="bottom" id="Version Control" order="6" weight="0.32939914" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="8" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32975295" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32975295" />
-      <window_info anchor="bottom" id="Run" order="10" weight="0.21800433" />
-      <window_info anchor="bottom" id="Debug" order="11" weight="0.3692829" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="right" id="Palette" order="3" />
-      <window_info anchor="right" id="Database" order="4" />
-      <window_info anchor="right" id="Palette&#9;" order="5" />
-      <window_info anchor="right" id="SciView" order="6" />
+      <window_info anchor="bottom" id="Debug" order="10" weight="0.36842105" />
+      <window_info anchor="right" id="Coverage" order="0" side_tool="true" weight="0.32995737" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="1" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="3" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="4" />
+      <window_info anchor="right" id="Database" order="5" />
+      <window_info anchor="right" id="Palette&#9;" order="6" />
+      <window_info anchor="right" id="SciView" order="7" />
+      <window_info active="true" anchor="right" id="Run" order="8" visible="true" weight="0.21695095" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -426,6 +479,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="841">
           <caret line="158" column="31" selection-start-line="158" selection-start-column="31" selection-end-line="158" selection-end-column="31" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -438,32 +494,147 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.java" />
     <entry file="file://$PROJECT_DIR$/src/Assembler/Main.java" />
-    <entry file="file://$PROJECT_DIR$/ICS.iml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Assembler/Main.kt">
+    <entry file="file://$PROJECT_DIR$/labs/lab0/program.hex">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ICS.iml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="341">
-          <caret line="155" column="22" selection-start-line="155" selection-start-column="22" selection-end-line="155" selection-end-column="22" />
+        <state relative-caret-position="180">
+          <caret line="9" column="74" selection-start-line="9" selection-start-column="74" selection-end-line="9" selection-end-column="74" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Assembler/Inst.kt">
+    <entry file="file://$PROJECT_DIR$/.idea/vcs.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/uiDesigner.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/modules.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/misc.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/kotlinc.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/libraries/KotlinJavaRuntime.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Assembler/RegexTest.kts">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="48" column="8" selection-start-line="48" selection-start-column="8" selection-end-line="48" selection-end-column="8" />
+        <state>
+          <caret selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/lib/kotlin-stdlib-sources.jar!/common/generated/_Collections.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="1560" selection-start-line="1560" selection-end-line="1560" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Assembler/Instruction.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="719">
+          <caret line="317" column="40" selection-start-line="317" selection-start-column="40" selection-end-line="317" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Assembler/Main.kt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="161">
+          <caret line="11" column="22" selection-start-line="11" selection-start-column="22" selection-end-line="11" selection-end-column="22" />
         </state>
       </provider>
     </entry>
   </component>
   <component name="masterDetails">
     <states>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>No facets are configured</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>kotlinc</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>Kotlin SDK</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>ICS</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+                <option value="0.6" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
       <state key="ProjectJDKs.UI">
         <settings>
           <last-edited>Python 3.6</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>KotlinJavaRuntime</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
