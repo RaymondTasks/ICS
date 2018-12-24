@@ -63,7 +63,7 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
     val insts = ArrayList<Instruction>()
 
     //生成指令对象
-    lines.forEachIndexed() { lineNumber, it ->
+    lines.forEachIndexed { lineNumber, it ->
 
         if (it.indexOf('"') != -1 || it.indexOf('\'') != -1) {
 
@@ -91,6 +91,7 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
 
             //引号在注释中，忽略
             if (a == -1 && b == -1) {
+
                 //去注释、首位空格
                 val str = it.replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
                 //分割字段
@@ -113,26 +114,32 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
                 val right = it.substring(b)
 
                 //字符串左右要有空格和别的字段隔离
-                if (left.isNotEmpty() && !left.matches(Regex("\\s$"))) {
+                if (left.isNotEmpty() && !left.matches(Regex("^.*\\s$"))) {
                     throw AssemblyException(it, lineNumber + 1,
                             "Illegal instruction format")
                 }
-                if (right.isNotEmpty() && !right.matches(Regex("^\\s"))) {
+                if (right.isNotEmpty() && !right.matches(Regex("^\\s.*$"))) {
                     throw AssemblyException(it, lineNumber + 1,
                             "Illegal instruction format")
                 }
 
                 val words = ArrayList<String>()
 
-                words.addAll(left
-                        .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-                        .split(Regex("(\\s*,\\s*)|(\\s+)"))
-                        .toTypedArray())
+                var tmp = left.replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+                if (tmp.isNotEmpty()) {
+                    words.addAll(tmp
+                            .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                            .toTypedArray())
+                }
+
                 words.add(string)
-                words.addAll(right
-                        .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-                        .split(Regex("(\\s*,\\s*)|(\\s+)"))
-                        .toTypedArray())
+
+                tmp = right.replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+                if (tmp.isNotEmpty()) {
+                    words.addAll(tmp
+                            .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                            .toTypedArray())
+                }
 
                 insts.add(Instruction(words.toTypedArray(), it, lineNumber + 1))
 
