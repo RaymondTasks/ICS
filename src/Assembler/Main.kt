@@ -4,53 +4,34 @@ import java.io.*
 
 /**
  * main函数
- * 汇编选项
- * [-o] 输出路径 默认输出到
  */
 fun main(args: Array<String>) {
-//    regexTest()
-    when (args.size) {
-        1 -> {
-            if (args[0].startsWith('-')) {
-                println("Illegal parameters")
-            } else {
-                val file = File(args[0])
-                if (!file.exists()) {
-                    println("No input files")
-                } else {
-                    val input = File(args[0])
-                    assemble(input, File(input.parent + "\\" + "program.obj"))
-                }
-            }
+    if (args.size == 1) {
+        val input = File(args[0])
+        if (!input.exists()) {
+            println("No input files")
+        } else {
+            assemble(input, File("${input.parent}/${input.nameWithoutExtension}.obj"))
         }
-        3 -> {
-            if (args[0].startsWith('-')
-                    || args[1] != "-o"
-                    || args[2].startsWith('-')) {
-                println("Illegal parameters")
-            } else {
-                val file = File(args[0])
-                if (!file.exists()) {
-                    println("No input files")
-                } else {
-                    assemble(File(args[0]), File(args[2]))
-                }
-            }
-        }
-        else -> {
-            println("Illegal parameters")
-        }
+    } else {
+        println("No input files")
     }
 
 }
 
 fun assemble(input: File, output: File) {
     val fin = BufferedReader(FileReader(input))
+
+    //格式化
     val insts = format(fin.readLines().toTypedArray())
+
+    //创建符号链接表
     val start = creatSymbolTable(insts)
+
     val out = DataOutputStream(
             BufferedOutputStream(
                     FileOutputStream(output)))
+    //生成机器码
     generateMachineCode(insts, start).forEach {
         println(it.toInt().toString(16))
         out.writeShort(it.toInt())
@@ -58,141 +39,91 @@ fun assemble(input: File, output: File) {
     out.flush()
 }
 
-
-fun regexTest() {
-    println("#-123".matches(Regex("^#\\-?\\d+$")))
-    println("XADf".matches(Regex("^x[\\dA-F]+$", RegexOption.IGNORE_CASE)))
-    "   AdD   R0, r0, #-16; cg  ;27r2263"
-            .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-            .split(Regex("(\\s*,\\s*)|(\\s+)")).forEach {
-                println(it)
-            }
-}
-
 /**
  * 格式化汇编码并转化为指令对象
  * 指令和寄存器忽略大小写
  * label和字符串大小写敏感
- * @param asm 未格式化的汇编码
+ * @param lines 未格式化的汇编码
  * @return 指令对象列表
  */
 fun format(lines: Array<String>): ArrayList<Instruction> {
     val insts = ArrayList<Instruction>()
 
-    //按行分割
-//    val lines = asm.split(Regex("\\n\\s*")).toTypedArray()
-
-//    asm.split(Regex("\\n\\s*")).forEach {
-//        originalLines.add(StringBuilder(it))
-//    }
-
     //生成指令对象
-    lines.forEach {
+    lines.forEachIndexed() { lineNumber, it ->
 
-        if (Regex("\\.STRINGZ", RegexOption.IGNORE_CASE) in it) {
-            //可能存在字符串,需要特殊对待
-            var inString = false       //在字符串中
+        if (it.indexOf('"') != -1 || it.indexOf('\'') != -1) {
+
+            //可能存在字符串,需要特殊处理
+
             var a = -1      //字符串左边界（包括）
             var b = -1      //字符串右边界（不包括）
+
             //寻找字符串的范围
-            findStr@ for (i in 0 until it.length) {
-                if (!inString) {
+            findStr@
+            for (i in 0 until it.length) {
+                if (a == -1) {
                     when (it[i]) {
-                        ';' -> break@findStr    //找到注释，跳出
-                        '\'', '"' -> {          //字符串内容开始
-                            if (a == -1) {
-                                inString = true
-                                a = i
-                            } else {
-                                //todo 字符串闭合错误
-                                throw Exception()
-                            }
+                        ';' -> break@findStr
+                        '\'', '"' -> {
+                            a = i
                         }
                     }
-                } else {
-                    if (it[i] == it[a] && it[i - 1] != '\\') {
-                        inString = false
-                        b = i + 1               //字符串内容结束
-                    }
+                } else if (it[i] == it[a] && it[i - 1] != '\\') {
+                    b = i + 1               //字符串内容结束
+                    break@findStr
+
                 }
             }
-//            println(a)
-//            println(b)
+
             if (a == -1 || b == -1) {
                 //todo 字符串未闭合
                 throw Exception()
             }
+
+            val left = it.substring(0, a)
+            val string = it.substring(a, b)
+            val right = it.substring(b)
+
+            //字符串左右要有空格和别的字段隔离
+            if (left.isNotEmpty() && !left.matches(Regex("\\s$"))) {
+                throw Exception()
+            }
+            if (right.isNotEmpty() && !right.matches(Regex("^\\s"))) {
+                throw Exception()
+            }
+
             val words = ArrayList<String>()
 
-            var asmPart = it.substring(0, a)
+            words.addAll(left
                     .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-            if (asmPart != "") {
-                words.addAll(
-                        asmPart.split(Regex("(\\s*,\\s*)|(\\s+)")))
-            }
-
-            words.add(it.substring(a, b))
-
-            asmPart = it.substring(b)
+                    .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                    .toTypedArray())
+            words.add(string)
+            words.addAll(right
                     .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-            if (asmPart != "") {
-                words.addAll(asmPart.split(Regex("(\\s*,\\s*)|(\\s+)")))
-            }
+                    .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                    .toTypedArray())
 
-            insts.add(Instruction(words.toTypedArray()))
+            insts.add(Instruction(words.toTypedArray(), it, lineNumber))
 
         } else {
-            //非.STRINGZ
+
             //去注释、首位空格
             val str = it.replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-//            println(str)
             //分割字段
-            if (str != "") {  //排除空行
-                //添加一条有效指令
-                insts.add(Instruction(
-                        str.split(Regex("(\\s*,\\s*)|(\\s+)"))
-                                .toTypedArray()))
+            if (str.isNotEmpty()) {  //排除空行
+                //添加一条指令
+                insts.add(Instruction(str
+                        .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                        .toTypedArray()
+                        , it, lineNumber))
             }
         }
 
     }
     return insts
 }
-
-/**
- * 获得.ORIG和.END中间的指令
- * 获得开始地址
- */
-//fun getStartAddr(insts: ArrayList<Instruction>): Int {
-//    val startIndex1 = insts.indexOfFirst {
-//        it.Inst == ".ORIG"
-//    }
-//    val startIndex2 = insts.indexOfLast {
-//        it.Inst == ".ORIG"
-//    }
-//    if (startIndex1 == -1 || startIndex1 != startIndex2) {
-//        return -1
-//    }
-//
-//    val endIndex1 = insts.indexOfLast {
-//        it.Inst == ".END"
-//    }
-//    val endIndex2 = insts.indexOfFirst {
-//        it.Inst == ".END"
-//    }
-//    if (endIndex1 == -1 || endIndex1 != endIndex2) {
-//        return -1
-//    }
-//
-//    val tmp = insts[startIndex1].imm
-//    while (insts.size > endIndex1) {
-//        insts.removeAt(endIndex1)
-//    }
-//    for (i in 0..startIndex1) {
-//        insts.removeAt(0)
-//    }
-//    return tmp
-//}
 
 /**
  * 创建符号链接表

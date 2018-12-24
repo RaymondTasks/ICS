@@ -25,9 +25,9 @@ internal enum class WordType {
     Unknown
 }
 
-class Instruction(private var asm: Array<String>) {
-
-    var originAsm: Array<String>
+class Instruction(private var asm: Array<String>,
+                  private val originText: String,
+                  private val originLineNumber: Int) {
 
     var addrLabel: String? = null       //指令前的地址label
     var addr = -1                       //这条指令的开始地址
@@ -46,8 +46,6 @@ class Instruction(private var asm: Array<String>) {
     private var label: String? = null   //指令中包含的label
 
     init {
-        //保存原始指令
-        originAsm = asm.copyOf()
 
         //分析各个字段的类型
         val wordType = ArrayList<WordType>()
@@ -79,7 +77,7 @@ class Instruction(private var asm: Array<String>) {
                 else -> {
                     if (s.matches(Regex("^x[\\dA-F]+$", RegexOption.IGNORE_CASE))) {
                         wordType.add(WordType.Number)
-                    } else if (s.matches(Regex("^#\\-?\\d+$"))) {
+                    } else if (s.matches(Regex("^#-?\\d+$"))) {
                         wordType.add(WordType.Number)
                     } else if ((s.first() == '\'' || s.first() == '"') && s.last() == s.first()) {
                         wordType.add(WordType.String)
