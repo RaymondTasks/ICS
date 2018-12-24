@@ -25,9 +25,15 @@ internal enum class WordType {
     Unknown
 }
 
+/**
+ * 指令对象
+ * @param asm 分割字段的汇编码
+ * @param originalText 原始汇编码
+ * @param originalLineNumber 此条指令在原汇编码文件的行序号
+ */
 class Instruction(private var asm: Array<String>,
-                  private val originText: String,
-                  private val originLineNumber: Int) {
+                  val originalText: String,
+                  val originalLineNumber: Int) {
 
     var addrLabel: String? = null       //指令前的地址label
     var addr = -1                       //这条指令的开始地址
@@ -35,7 +41,7 @@ class Instruction(private var asm: Array<String>,
 
     var Inst: String                    //指令
 
-    private var is_imm = false          //add and是否是立即数型
+    private var is_imm = false          //ADD AND 是否是立即数型
     private var SR1 = -1                //SR1
     private var SR2 = -1                //SR2
     private var SR = -1                 //SR
@@ -45,6 +51,9 @@ class Instruction(private var asm: Array<String>,
     private var string: String? = null  //.STRINGZ后的字符串
     private var label: String? = null   //指令中包含的label
 
+    /**
+     * 构造函数
+     */
     init {
 
         //分析各个字段的类型
@@ -75,17 +84,16 @@ class Instruction(private var asm: Array<String>,
 
                 //需要进行正则匹配，确定是否合法
                 else -> {
-                    if (s.matches(Regex("^x[\\dA-F]+$", RegexOption.IGNORE_CASE))) {
+                    if (s.matches(Regex("^[xX][\\dA-Fa-f]+$"))) {
                         wordType.add(WordType.Number)
                     } else if (s.matches(Regex("^#-?\\d+$"))) {
                         wordType.add(WordType.Number)
                     } else if ((s.first() == '\'' || s.first() == '"') && s.last() == s.first()) {
                         wordType.add(WordType.String)
-                    } else if (s.matches(Regex("^[A-Z_]\\w*$", RegexOption.IGNORE_CASE))) {
+                    } else if (s.matches(Regex("^[A-Za-z_]\\w*$"))) {
                         wordType.add(WordType.Label)
                     } else {
-                        //todo 非法格式
-                        throw Exception()
+                        throwIllegalInstructionFormatException()
                     }
 
                 }
@@ -108,26 +116,26 @@ class Instruction(private var asm: Array<String>,
                     wordType.removeAt(0)
                     asm = asm.copyOfRange(1, asm.size)
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
             else -> {
-                //todo
-                throw Exception()
+                throwIllegalInstructionFormatException()
             }
         }
 
         Inst = asm[0]
+
+        //指令解析
         when (Inst) {
 
             in TrapVectorTable -> {
                 if (asm.size == 1) {
+                    //TRAP指令转化回TRAP
                     Inst = "TRAP"
                     imm = TrapVectorTable[asm[0]] as Int
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -146,11 +154,10 @@ class Instruction(private var asm: Array<String>,
                             is_imm = true
                             imm = parseNumber(asm[3])
                         }
-                        else -> throw Exception()
+                        else -> throwIllegalInstructionFormatException()
                     }
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -161,8 +168,7 @@ class Instruction(private var asm: Array<String>,
                     DR = RegTable[asm[1]] as Int
                     SR1 = RegTable[asm[2]] as Int
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -171,15 +177,13 @@ class Instruction(private var asm: Array<String>,
                     Inst = "JMP"
                     BaseR = 7
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
             "RTI", ".END" -> {
                 if (asm.size != 1) {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -188,11 +192,10 @@ class Instruction(private var asm: Array<String>,
                     when (wordType[1]) {
                         WordType.Number -> imm = parseNumber(asm[1])
                         WordType.Label -> label = asm[1]
-                        else -> throw  Exception()
+                        else -> throwIllegalInstructionFormatException()
                     }
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -201,8 +204,7 @@ class Instruction(private var asm: Array<String>,
                         && wordType[1] == WordType.Reg) {
                     BaseR = RegTable[asm[1]] as Int
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -216,11 +218,10 @@ class Instruction(private var asm: Array<String>,
                     when (wordType[2]) {
                         WordType.Number -> imm = parseNumber(asm[2])
                         WordType.Label -> label = asm[2]
-                        else -> throw Exception()
+                        else -> throwIllegalInstructionFormatException()
                     }
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -236,8 +237,7 @@ class Instruction(private var asm: Array<String>,
                     BaseR = RegTable[asm[2]] as Int
                     imm = parseNumber(asm[3])
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
 
@@ -249,13 +249,11 @@ class Instruction(private var asm: Array<String>,
                         if (imm >= 1) {
                             length = imm
                         } else {
-                            //todo
-                            throw Exception()
+                            throwIllegalInstructionFormatException()
                         }
                     }
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
             ".ORIG" -> {
@@ -264,8 +262,7 @@ class Instruction(private var asm: Array<String>,
                 } else if (asm.size == 2 && wordType[1] == WordType.Number) {
                     imm = parseNumber(asm[1])
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
             ".STRINGZ" -> {
@@ -274,13 +271,11 @@ class Instruction(private var asm: Array<String>,
                     string = asm[1].substring(1, asm[1].length - 1)
                     length = string!!.length + 1
                 } else {
-                    //todo
-                    throw Exception()
+                    throwIllegalInstructionFormatException()
                 }
             }
             else -> {
-                //todo
-                throw Exception()
+                throwIllegalInstructionFormatException()
             }
         }
 
@@ -292,9 +287,11 @@ class Instruction(private var asm: Array<String>,
     fun toMachineCode(): ShortArray {
         //Inst已经转化成了大写
         when (Inst) {
+
             in InstOpCodeTable -> {
                 var code = (InstOpCodeTable[Inst] as Int) shl 12
                 when (Inst) {
+
                     "ADD", "AND" -> {
                         code += DR shl 9
                         code += SR1 shl 6
@@ -303,109 +300,98 @@ class Instruction(private var asm: Array<String>,
                             if (imm in -16..15) {
                                 code += imm and 0b11_111
                             } else {
-                                //todo 超出立即数表达范围
-                                throw Exception()
+                                throwImmediateException(-16, 15)
                             }
                         } else {
                             code += SR2
                         }
                     }
+
                     "NOT" -> {
                         code += DR shl 9
                         code += SR1 shl 6
                         code += 0b111111
                     }
+
                     "JMP", "RET", "JSRR" -> {
                         code += BaseR shl 6
                     }
+
                     "JSR" -> {
                         code += 1 shl 11
                         if (imm in -1024..1023) {
                             code += imm and 0b11_111_111_111
                         } else {
-                            //todo 超出立即数表达范围
-                            throw Exception()
+                            throwImmediateException(-1024, 1023)
                         }
                     }
+
                     "RTI" -> {
                         //do nothing
                     }
-                    "LD", "LDI", "LEA" -> {
-                        code += DR shl 9
+
+                    "LD", "LDI", "LEA", "ST", "STI" -> {
+                        when (Inst) {
+                            "LD", "LDI", "LEA" -> code += DR shl 9
+                            "ST", "STI" -> code += SR shl 9
+                        }
                         if (imm in -256..255) {
                             code += imm and 0b111_111_111
                         } else {
-                            //todo 超出立即数表达范围
-                            throw Exception()
+                            throwImmediateException(-256, 255)
                         }
                     }
-                    "LDR" -> {
-                        code += DR shl 9
+
+                    "LDR", "STR" -> {
+                        when (Inst) {
+                            "LDR" -> code += DR shl 9
+                            "STR" -> code += SR shl 9
+                        }
                         code += BaseR shl 6
                         if (imm in -32..31) {
                             code += imm and 0b111_111
                         } else {
-                            //todo 超出立即数表达范围
-                            throw Exception()
+                            throwImmediateException(-32, 31)
                         }
                     }
-                    "ST", "STI" -> {
-                        code += SR shl 9
-                        if (imm in -256..255) {
-                            code += imm and 0b111_111_111
-                        } else {
-                            //todo 超出立即数表达范围
-                            throw Exception()
-                        }
-                    }
-                    "STR" -> {
-                        code += SR shl 9
-                        code += BaseR shl 6
-                        if (imm in -32..31) {
-                            code += imm and 0b111_111
-                        } else {
-                            //todo 超出立即数表达范围
-                            throw Exception()
-                        }
-                    }
+
                     "TRAP" -> {
                         if (imm in 0..255) {
                             code += imm and 0b11_111_111
                         } else {
-                            //todo 超出立即数表达范围
-                            throw Exception()
+                            throwImmediateException(0, 255)
                         }
                     }
 
                 }
+
                 return shortArrayOf(code.toShort())
             }
+
             in BRnzpTable -> {
                 var code = (BRnzpTable[Inst] as Int) shl 9
                 if (imm in -256..255) {
                     code += imm and 0b111_111_111
                 } else {
-                    //todo 超出立即数表达范围
-                    throw Exception()
+                    throwImmediateException(-256, 255)
                 }
                 return shortArrayOf(code.toShort())
             }
+
             in PseudoInstTable -> {
                 when (Inst) {
                     ".FILL" -> {
                         if (imm in -32768..32767) {
                             return shortArrayOf(imm.toShort())
                         } else {
-                            //todo 超出立即数表达范围
-                            throw Exception()
+                            throwImmediateException(-32768, 32767)
                         }
                     }
                     ".BLKW" -> {
-                        if (imm >= 0) {
+                        if (imm > 0) {
                             return ShortArray(imm) { 0 }
                         } else {
-                            //todo 不能为负数
-                            throw Exception()
+                            throwImmediateException(0, Short.MAX_VALUE.toInt())
                         }
                     }
                     ".STRINGZ" -> {
@@ -416,19 +402,22 @@ class Instruction(private var asm: Array<String>,
                         tmp.add(0)
                         return tmp.toShortArray()
                     }
-                    else -> {
-                        //todo 不能出现 .ORIG 和 .END
-                        throw Exception()
+                    ".ORIG" -> {
+                        throw AssemblyException(originalText, originalLineNumber,
+                                "Duplicated .ORIG")
+                    }
+                    ".END" -> {
+                        throw AssemblyException(originalText, originalLineNumber,
+                                "Duplicated .END")
                     }
                 }
 
             }
             else -> {
-                //todo 非法指令
-                throw Exception()
+                throwIllegalInstructionFormatException()
             }
         }
-
+        return shortArrayOf()
     }
 
     /**
@@ -440,27 +429,44 @@ class Instruction(private var asm: Array<String>,
             if (tmp != null) {
                 imm = tmp - (addr + 1)
             } else {
-                //todo 不存在的label
-                throw Exception()
+                throw AssemblyException(originalText, originalLineNumber,
+                        "Can't find the label : $label")
             }
         }
     }
 
-}
+    /**
+     * 解析数字
+     */
+    private fun parseNumber(str: String): Int {
+        try {
+            when (str.first()) {
+                '#' -> {
+                    return str.substring(1).toInt(10)
+                }
+                'x', 'X' -> {
+                    return str.substring(1).toInt(16).toShort().toInt()
+                }
+            }
+        } catch (e: Exception) {
+        }
+        throwIllegalInstructionFormatException()
+        return -1
+    }
 
-/**
- * 解析数字
- */
-internal fun parseNumber(str: String) = when (str.first()) {
-    '#' -> {
-        str.substring(1).toInt(10)
+    /**
+     * 抛出立即数超出允许范围的异常
+     */
+    private fun throwImmediateException(min: Int, max: Int) {
+        throw AssemblyException(originalText, originalLineNumber,
+                "Immediate exceeds the allowed range : [$min, $max]")
     }
-    'x', 'X' -> {
-        str.substring(1).toInt(16).toShort().toInt()
+
+    private fun throwIllegalInstructionFormatException() {
+        throw AssemblyException(originalText, originalLineNumber,
+                "Illegal instruction format")
     }
-    else -> {
-        throw Exception()
-    }
+
 }
 
 

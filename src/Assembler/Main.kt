@@ -8,36 +8,49 @@ import java.io.*
 fun main(args: Array<String>) {
     if (args.size == 1) {
         val input = File(args[0])
-        if (!input.exists()) {
-            println("No input files")
+        if (input.exists()) {
+            assemble(input,
+                    File("${input.parent}/${input.nameWithoutExtension}.obj"))
         } else {
-            assemble(input, File("${input.parent}/${input.nameWithoutExtension}.obj"))
+            println("No input file")
         }
     } else {
-        println("No input files")
+        println("No input file")
     }
 
 }
 
+/**
+ * 汇编函数
+ * @param input 汇编码文件
+ * @param output 输出obj文件
+ */
 fun assemble(input: File, output: File) {
     val fin = BufferedReader(FileReader(input))
 
-    //格式化
-    val insts = format(fin.readLines().toTypedArray())
+    try {
+        //格式化
+        val insts = format(fin.readLines().toTypedArray())
 
-    //创建符号链接表
-    val start = creatSymbolTable(insts)
+        //创建符号链接表
+        val index = createSymbolTable(insts)
 
-    val out = DataOutputStream(
-            BufferedOutputStream(
-                    FileOutputStream(output)))
-    //生成机器码
-    generateMachineCode(insts, start).forEach {
-        println(it.toInt().toString(16))
-        out.writeShort(it.toInt())
+        val out = DataOutputStream(
+                BufferedOutputStream(
+                        FileOutputStream(output)))
+        //生成机器码
+        generateMachineCode(insts, index[0], index[1])
+                .forEach {
+                    out.writeShort(it.toInt())
+                }
+        out.flush()
+    } catch (e: AssemblyException) {
+        println(e.message)
     }
-    out.flush()
+
+
 }
+
 
 /**
  * 格式化汇编码并转化为指令对象
@@ -76,36 +89,54 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
                 }
             }
 
-            if (a == -1 || b == -1) {
-                //todo 字符串未闭合
-                throw Exception()
+            //引号在注释中，忽略
+            if (a == -1 && b == -1) {
+                //去注释、首位空格
+                val str = it.replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+                //分割字段
+                if (str.isNotEmpty()) {  //排除空行
+                    //添加一条指令
+                    insts.add(Instruction(str
+                            .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                            .toTypedArray()
+                            , it, lineNumber))
+                }
+
+            } else {
+                if (b == -1) {
+                    throw AssemblyException(it, lineNumber,
+                            "\" not closed")
+                }
+
+                val left = it.substring(0, a)
+                val string = it.substring(a, b)
+                val right = it.substring(b)
+
+                //字符串左右要有空格和别的字段隔离
+                if (left.isNotEmpty() && !left.matches(Regex("\\s$"))) {
+                    throw AssemblyException(it, lineNumber,
+                            "Illegal instruction format")
+                }
+                if (right.isNotEmpty() && !right.matches(Regex("^\\s"))) {
+                    throw AssemblyException(it, lineNumber,
+                            "Illegal instruction format")
+                }
+
+                val words = ArrayList<String>()
+
+                words.addAll(left
+                        .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+                        .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                        .toTypedArray())
+                words.add(string)
+                words.addAll(right
+                        .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
+                        .split(Regex("(\\s*,\\s*)|(\\s+)"))
+                        .toTypedArray())
+
+                insts.add(Instruction(words.toTypedArray(), it, lineNumber))
+
             }
-
-            val left = it.substring(0, a)
-            val string = it.substring(a, b)
-            val right = it.substring(b)
-
-            //字符串左右要有空格和别的字段隔离
-            if (left.isNotEmpty() && !left.matches(Regex("\\s$"))) {
-                throw Exception()
-            }
-            if (right.isNotEmpty() && !right.matches(Regex("^\\s"))) {
-                throw Exception()
-            }
-
-            val words = ArrayList<String>()
-
-            words.addAll(left
-                    .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-                    .split(Regex("(\\s*,\\s*)|(\\s+)"))
-                    .toTypedArray())
-            words.add(string)
-            words.addAll(right
-                    .replace(Regex("(\\s*;.*$)|(^\\s+)|(\\s+$)"), "")
-                    .split(Regex("(\\s*,\\s*)|(\\s+)"))
-                    .toTypedArray())
-
-            insts.add(Instruction(words.toTypedArray(), it, lineNumber))
 
         } else {
 
@@ -125,78 +156,80 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
     return insts
 }
 
+
 /**
- * 创建符号链接表
- * @param insts 指令对象列表,去除了.START和.END
- * @param start 第一条指令所在的位置
- * @return 符号链接表
+ * 创建符号链接表，并把指令中的label进行替换
+ * @param insts 指令对象列表
+ * @return 第一条指令的地址
  */
-fun creatSymbolTable(insts: ArrayList<Instruction>): Int {
-    val startIndex1 = insts.indexOfFirst {
+fun createSymbolTable(insts: ArrayList<Instruction>): Array<Int> {
+    val origIndex = insts.indexOfFirst {
         it.Inst == ".ORIG"
     }
-    val startIndex2 = insts.indexOfLast {
-        it.Inst == ".ORIG"
-    }
-    if (startIndex1 == -1 || startIndex1 != startIndex2) {
-        throw Exception()
+    if (origIndex == -1) {
+        throw AssemblyException(null, null,
+                "Can't find .ORIG")
     }
 
-    val endIndex1 = insts.indexOfLast {
+    val endIndex = insts.indexOfLast {
         it.Inst == ".END"
     }
-    val endIndex2 = insts.indexOfFirst {
-        it.Inst == ".END"
+    if (endIndex == -1) {
+        throw AssemblyException(null, null,
+                "Can't find .END")
     }
-    if (endIndex1 == -1 || endIndex1 != endIndex2) {
-        throw Exception()
+
+    if (origIndex >= endIndex) {
+        throw AssemblyException(null, null,
+                "No valid instructions between .ORIG and .END")
     }
 
     //获得起始地址
-    val start = insts[startIndex1].imm
-    var addr = start
-
-    while (insts.size > endIndex1) {
-        insts.removeAt(endIndex1)
-    }
-    for (i in 0..startIndex1) {
-        insts.removeAt(0)
-    }
+    var addr = insts[origIndex].imm
 
     val table = HashMap<String, Int>()
-    insts.forEach {
-        it.addr = addr
-        if (it.addrLabel != null) {
-            if (it.addrLabel in table) {
-                //todo label重复错误
-                throw Exception()
+    //创建符号链接表
+    for (i in origIndex + 1 until endIndex) {
+        insts[i].addr = addr
+        if (insts[i].addrLabel != null) {
+            if (insts[i].addrLabel in table) {
+                throw AssemblyException(
+                        insts[i].originalText,
+                        insts[i].originalLineNumber,
+                        "Duplicated label : ${insts[i].addrLabel}")
             } else {
                 //添加一个label
-                table[it.addrLabel!!] = addr
+                table[insts[i].addrLabel!!] = addr
             }
         }
-        //更新label
-        addr += it.length
+        addr += insts[i].length
     }
 
-    insts.forEach {
-        it.replaceLabel(table)
+    //替换指令中的label
+    for (i in origIndex + 1 until endIndex) {
+        insts[i].replaceLabel(table)
     }
 
-    return start
+    return arrayOf(origIndex, endIndex)
 }
 
 /**
  * 生成机器码
  * @param insts 指令对象列表,去除了.START和.END,更新了label
+ * @param origIndex 汇编开始处
+ * @param endIndex 汇编结束处
  * @return 机器码序列
  */
-fun generateMachineCode(insts: ArrayList<Instruction>, start: Int): ArrayList<Short> {
-    val array = arrayListOf(start.toShort())
-    insts.forEach {
-        it.toMachineCode().forEach { code ->
-            array.add(code)
-        }
+fun generateMachineCode(insts: ArrayList<Instruction>,
+                        origIndex: Int,
+                        endIndex: Int): ArrayList<Short> {
+
+    val array = arrayListOf(insts[origIndex].imm.toShort())
+    for (i in origIndex + 1 until endIndex) {
+        insts[i].toMachineCode()
+                .forEach {
+                    array.add(it)
+                }
     }
     return array
 }
