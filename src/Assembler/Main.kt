@@ -116,11 +116,11 @@ fun format(lines: Array<String>): ArrayList<Instruction> {
                 //字符串左右要有空格和别的字段隔离
                 if (left.isNotEmpty() && !left.matches(Regex("^.*\\s$"))) {
                     throw AssemblyException(it, lineNumber + 1,
-                            "Illegal instruction format")
+                            "Instruction syntax error")
                 }
                 if (right.isNotEmpty() && !right.matches(Regex("^\\s.*$"))) {
                     throw AssemblyException(it, lineNumber + 1,
-                            "Illegal instruction format")
+                            "Instruction syntax error")
                 }
 
                 val words = ArrayList<String>()

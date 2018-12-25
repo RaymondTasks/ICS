@@ -93,7 +93,7 @@ class Instruction(private var asm: Array<String>,
                     } else if (s.matches(Regex("^[A-Za-z_]\\w*$"))) {
                         wordType.add(WordType.Label)
                     } else {
-                        throwIllegalInstructionFormatException()
+                        throwInstructionSyntaxException()
                     }
 
                 }
@@ -116,11 +116,11 @@ class Instruction(private var asm: Array<String>,
                     wordType.removeAt(0)
                     asm = asm.copyOfRange(1, asm.size)
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
             else -> {
-                throwIllegalInstructionFormatException()
+                throwInstructionSyntaxException()
             }
         }
 
@@ -135,7 +135,7 @@ class Instruction(private var asm: Array<String>,
                     Inst = "TRAP"
                     imm = TrapVectorTable[asm[0]] as Int
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -154,10 +154,10 @@ class Instruction(private var asm: Array<String>,
                             is_imm = true
                             imm = parseNumber(asm[3])
                         }
-                        else -> throwIllegalInstructionFormatException()
+                        else -> throwInstructionSyntaxException()
                     }
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -168,7 +168,7 @@ class Instruction(private var asm: Array<String>,
                     DR = RegTable[asm[1]] as Int
                     SR1 = RegTable[asm[2]] as Int
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -177,13 +177,13 @@ class Instruction(private var asm: Array<String>,
                     Inst = "JMP"
                     BaseR = 7
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
             "RTI", ".END" -> {
                 if (asm.size != 1) {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -192,10 +192,10 @@ class Instruction(private var asm: Array<String>,
                     when (wordType[1]) {
                         WordType.Number -> imm = parseNumber(asm[1])
                         WordType.Label -> label = asm[1]
-                        else -> throwIllegalInstructionFormatException()
+                        else -> throwInstructionSyntaxException()
                     }
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -204,7 +204,7 @@ class Instruction(private var asm: Array<String>,
                         && wordType[1] == WordType.Reg) {
                     BaseR = RegTable[asm[1]] as Int
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -218,10 +218,10 @@ class Instruction(private var asm: Array<String>,
                     when (wordType[2]) {
                         WordType.Number -> imm = parseNumber(asm[2])
                         WordType.Label -> label = asm[2]
-                        else -> throwIllegalInstructionFormatException()
+                        else -> throwInstructionSyntaxException()
                     }
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -237,7 +237,7 @@ class Instruction(private var asm: Array<String>,
                     BaseR = RegTable[asm[2]] as Int
                     imm = parseNumber(asm[3])
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
 
@@ -253,7 +253,7 @@ class Instruction(private var asm: Array<String>,
                         }
                     }
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
             ".ORIG" -> {
@@ -262,7 +262,7 @@ class Instruction(private var asm: Array<String>,
                 } else if (asm.size == 2 && wordType[1] == WordType.Number) {
                     imm = parseNumber(asm[1])
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
             ".STRINGZ" -> {
@@ -271,11 +271,11 @@ class Instruction(private var asm: Array<String>,
                     string = asm[1].substring(1, asm[1].length - 1)
                     length = string!!.length + 1
                 } else {
-                    throwIllegalInstructionFormatException()
+                    throwInstructionSyntaxException()
                 }
             }
             else -> {
-                throwIllegalInstructionFormatException()
+                throwInstructionSyntaxException()
             }
         }
 
@@ -410,7 +410,7 @@ class Instruction(private var asm: Array<String>,
 
             }
             else -> {
-                throwIllegalInstructionFormatException()
+                throwInstructionSyntaxException()
             }
         }
         return shortArrayOf()
@@ -446,7 +446,7 @@ class Instruction(private var asm: Array<String>,
             }
         } catch (e: Exception) {
         }
-        throwIllegalInstructionFormatException()
+        throwInstructionSyntaxException()
         return -1
     }
 
@@ -458,9 +458,9 @@ class Instruction(private var asm: Array<String>,
                 "Immediate exceeds the allowed range : [$min, $max]")
     }
 
-    private fun throwIllegalInstructionFormatException() {
+    private fun throwInstructionSyntaxException() {
         throw AssemblyException(originalText, originalLineNumber,
-                "Illegal instruction format")
+                "Instruction syntax error")
     }
 
 }

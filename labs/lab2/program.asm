@@ -1,138 +1,187 @@
-;函数调用的实参放在R0~R5
-;如果参数多于6个
-;则R5存放剩余参数的内存起始地址
-;R6是栈指针
-;函数返回值存放在R0
-;被调函数保证R1~R5在调用前后不改变
-;若函数没有返回值，则R0也保证不变
+;函数实参放在R0~R4
+;如果参数多于5个
+;R4存放剩余参数的内存地址
+;R0存放返回值
+;被调函数保证R1~R4的不变性
+;如果没有返回值，R0也保证不变
 ;TRAP也遵守以上规则
-;函数调用者在调用函数或者TRAP前把R7和其他要保存的数据压栈
-;返回后把R7出栈
-;压栈和出栈时都要对栈上溢或下溢情况进行判断
+
+;正常返回时R5=0
+;发生栈上溢R5=1
+;发生栈下溢R5=2
 
 			.ORIG	x3000
-			;程序起始点
-start		LD 		R6, Stackinit
+
+start		LD 		R6, stackinit
 			JSR		main
 			HALT
-Stackinit	.FILL 	x4000	;空栈时栈顶
-Stackmax	.FILL 	x3FFB	;栈满时的栈顶
 
+stackinit 	xF001
+stackmax	xD000
+
+Nstackinit	x0FFF
+Nstackmax	x3000
+
+			
 			;main函数
-			;返回0代表正常结束
-			;返回非0代表异常
-			;此处规定1代表发生了stack overflow
-			;2代表stack underflow
-main		ADD 	R6, R6, #-6
+main 		ADD		R6, R6, #-5
+			;检查栈上溢
+			LDR 	R5, Nstackmax
+			ADD		R5, R5, R6
+			BRn 	mainOF
+
+			;main的栈空间
 			STR 	R1, R6, #0
 			STR 	R2, R6, #1
 			STR 	R3, R6, #2
 			STR 	R4, R6, #3
-			STR 	R5, R6, #4
-			STR 	R7, R6, #5
+			STR 	R7, R6, #4
 
 			GETC
 
-			LD 		R7, Char0N
-			ADD 	R0, R0, R7	;n
+			LD 		R5, Nchar0	;
+			ADD 	R0, R0, R5	;n = GETC() - '0'
 			AND		R1, R1, #0	;a
 			AND		R2, R2, #0	;b
 			AND		R3, R3, #0	;c
-			AND		R4, R4, #0	;d
-			LEA		R5, Params
+			LEA		R4, args
 
-			JSR 	func
+			JSRR	func
+			;判断溢出
+			ADD		R5, R5, #0
+			BRnp	mainXF
 
+			;恢复寄存器
 			LDR 	R1, R6, #0
 			LDR 	R2, R6, #1
 			LDR 	R3, R6, #2
 			LDR 	R4, R6, #3
-			LDR 	R5, R6, #4
-			LDR 	R7, R6, #5
-			ADD 	R6, R6, #6
+			LDR 	R7, R6, #4
+			ADD		R6, R6, #5
 
-			AND 	R0, R0, #0	;main正常返回
+			;检查栈下溢
+			LDR		R5, Nstackinit
+			ADD		R5, R5, R6
+			BRp		mainUF
+			
+			;正常返回
+			AND		R5, R5, #0
 			RET
 
-Params		.FILL	#0			;e
-			.FILL	#0			;f
-Char0Nmain	.FILL	#-48 		;0的ascii码的相反数
-			;main函数结束
+			;调用函数发生溢出
+mainXF		LDR 	R1, R6, #0
+			LDR 	R2, R6, #1
+			LDR 	R3, R6, #2
+			LDR 	R4, R6, #3
+			LDR 	R7, R6, #4
+			ADD		R6, R6, #5
+			RET
+
+			;栈上溢
+mainOF		ADD		R6, R6, #5
+			AND		R5, R5, #0
+			ADD		R5, R5, #1
+			RET
+
+			;栈下溢
+mainUF		AND		R5, R5, #0
+			ADD		R5, R5, #2
+			RET
+
+args		.FILL	#0		;d
+			.FILL	#0		;e
+			.FILL	#0		;f
+
+Mchar0		.FILL	#-48	;-'0'
+
+
 
 
 			;func函数
-func		ADD 	R6, R6, #2
-			STR 	R0, R6, #0	;保存n
-			STR 	R7, R6, #1	;保存R7
+			;R0=n,R1=a,R2=b,R3=c,M[R4]=d,M[R4+1]=e,M[R4+2]=f
+func 		ADD		R6, R6, #-4
+			;检查栈上溢
+			LDR 	R5, Nstackmax
+			ADD		R5, R5, R6
+			BRn 	funcOF
+
+			;栈空间从上至下分别为n,t,x,R7
+			STR 	R0, R6, #0
+			STR 	R7, R6, #3
 
 			GETC
 
-			;计算t，存放在R0
-			LD 		R7, Char0Nfunc
-			ADD 	R0, R0, R7 	;-'0'
-			ADD 	R0, R0, R1 	;+a
-			ADD 	R0, R0, R2 	;+b
-			ADD 	R0, R0, R3 	;+c
-			ADD 	R0, R0, R4 	;+d
-			LDR 	R7, R5, #0
-			ADD 	R0, R0, R7 	;+e
-			LDR 	R7, R5, #1
-			ADD 	R0, R0, R7 	;+f
-
-			;取回n
-			LDR 	R7, R6, #0
+			;t = GETC() - '0' + a + b + c + d + e + f
+			LD 		R5, Nchar0
+			ADD		R0, R0, R5
+			ADD		R0, R0, R1
+			ADD		R0, R0, R2
+			ADD		R0, R0, R3
+			LDR		R5, R4, #0
+			ADD		R0, R0, R5
+			LDR		R5, R4, #1
+			ADD		R0, R0, R5
+			LDR		R5, R4, #2
+			ADD		R0, R0, R5
 
 			;分支判断
-			ADD 	R7, R7, #-1
-			BRnz	else
+			LDR 	R5, R6, #0
+			ADD		R5, R5, #-1
+			BRnz 	return
 
-			; n > 1
-			;保存t
-if			ADD 	R6, R6, #-1
-			STR 	R0, R6, #0
+			;储存t
+			STR 	R0, R6, #1
+			ADD		R0, R5, #0
 
 			;计算x
-			ADD 	R0, R7, #0
 			JSR 	func
+			;判断溢出
+			ADD		R5, R5, #0
+			BRnp	funcXF
 
-			;保存x
-			ADD 	R6, R6, #-1
-			STR 	R0, R6, #0
-
-			;计算y
-			LDR 	R7, R6, #1
-			ADD 	R0, R0, #-2
-			JSR 	func
-
-			;计算x+y+t-1
-			LDR 	R7, R6, #0
-			ADD		R0, R0, R7
-			LDR 	R7, R6, #1
-			ADD		R0, R0, R7
+			;储存x
+			STR 	R0, R6, #2
 			ADD		R0, R0, #-1
 
-			;返回
-			LDR 	R7, R6, #2
-			ADD 	R6, R6, #3
-			RET
+			;计算y
+			JSR 	func
+			;判断溢出
+			ADD		R5, R5, #0
+			BRnp	funcXF
 
-			;else
-else		LDR 	R7, R6, #1	;跳过没取出的n
-			ADD 	R6, R6, #2
-			RET
+			;x+y+t-1
+			LDR		R5, R6, #2
+			ADD		R0, R0, R5
+			LDR		R5, R6, #1
+			ADD		R0, R0, R5
+			ADD		R0, R0, #-1
 
-Char0Nfunc	.FILL	#-48
-			;func函数结束
+return		LDR 	R7, R6, #3
+			ADD		R6, R6, #4
+			;检查栈下溢
+			LDR 	R5, Nstackinit
+			ADD		R5, R5, R6
+			BRp 	funcUF
 			
+			;无异常返回
+			AND		R5, R5, #0
+			RET
 
-			;压栈子程序
-			;R0存放待压的数
-			;
-PUSH		
+			;递归函数发生溢出
+funcXF		LDR 	R7, R6, #3
+			ADD		R6, R6, #4
+			RET
 
-			;出栈子程序
-POP
+			;栈上溢
+funcOF		ADD		R6, R6, #4
+			AND		R5, R5, #0
+			ADD		R5, R5, #1
+			RET
+
+			;栈下溢
+funcUF		AND		R5, R5, #0
+			ADD		R5, R5, #2
+			RET
 
 
-
-.END
+			.END

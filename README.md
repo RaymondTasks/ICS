@@ -1,7 +1,19 @@
 # Introduction to Computing Systems (ICS) Course
 
-Labs (ongoing)
+Labs
+
+- Lab0 completed
+
+- Lab1 completed
+
+- Lab2 ongoing
+
+- Lab3
+
+- Lab4
+
+- Lab5
 
 Assembler (completed)
 
-Simulation (suspended)
+Simulator (ongoing)
