@@ -16,17 +16,17 @@ start		LD 		R6, stackinit
 			JSR		main
 			HALT
 
-stackinit 	xF001
-stackmax	xD000
+stackinit 	.FILL	xF001
+stackmax	.FILL	xD000
 
-Nstackinit	x0FFF
-Nstackmax	x3000
+Nstackinit	.FILL	x0FFF
+Nstackmax	.FILL	x3000
 
 			
 			;main函数
-main 		ADD		R6, R6, #-5
+main 		ADD		R6, R6, #-8
 			;检查栈上溢
-			LDR 	R5, Nstackmax
+			LD 		R5, Nstackmax
 			ADD		R5, R5, R6
 			BRn 	mainOF
 
@@ -35,18 +35,24 @@ main 		ADD		R6, R6, #-5
 			STR 	R2, R6, #1
 			STR 	R3, R6, #2
 			STR 	R4, R6, #3
-			STR 	R7, R6, #4
+			STR 	R7, R6, #7
 
 			GETC
+			;OUT
 
-			LD 		R5, Nchar0	;
-			ADD 	R0, R0, R5	;n = GETC() - '0'
-			AND		R1, R1, #0	;a
-			AND		R2, R2, #0	;b
-			AND		R3, R3, #0	;c
-			LEA		R4, args
+			ADD		R0, R0, #-16	;n = GETC() - '0'
+			ADD		R0, R0, #-16
+			ADD		R0, R0, #-16
 
-			JSRR	func
+			AND		R1, R1, #0	;a=0
+			AND		R2, R2, #0	;b=0
+			AND		R3, R3, #0	;c=0
+			STR 	R1, R6, #4	;d=0
+			STR 	R1, R6, #5	;e=0
+			STR 	R1, R6, #6	;f=0
+			ADD 	R4, R6, #4
+
+			JSR		func
 			;判断溢出
 			ADD		R5, R5, #0
 			BRnp	mainXF
@@ -56,11 +62,11 @@ main 		ADD		R6, R6, #-5
 			LDR 	R2, R6, #1
 			LDR 	R3, R6, #2
 			LDR 	R4, R6, #3
-			LDR 	R7, R6, #4
-			ADD		R6, R6, #5
+			LDR 	R7, R6, #7
+			ADD		R6, R6, #8
 
 			;检查栈下溢
-			LDR		R5, Nstackinit
+			LD		R5, Nstackinit
 			ADD		R5, R5, R6
 			BRp		mainUF
 			
@@ -73,12 +79,12 @@ mainXF		LDR 	R1, R6, #0
 			LDR 	R2, R6, #1
 			LDR 	R3, R6, #2
 			LDR 	R4, R6, #3
-			LDR 	R7, R6, #4
-			ADD		R6, R6, #5
+			LDR 	R7, R6, #7
+			ADD		R6, R6, #8
 			RET
 
 			;栈上溢
-mainOF		ADD		R6, R6, #5
+mainOF		ADD		R6, R6, #8
 			AND		R5, R5, #0
 			ADD		R5, R5, #1
 			RET
@@ -88,20 +94,13 @@ mainUF		AND		R5, R5, #0
 			ADD		R5, R5, #2
 			RET
 
-args		.FILL	#0		;d
-			.FILL	#0		;e
-			.FILL	#0		;f
-
-Mchar0		.FILL	#-48	;-'0'
-
-
 
 
 			;func函数
 			;R0=n,R1=a,R2=b,R3=c,M[R4]=d,M[R4+1]=e,M[R4+2]=f
 func 		ADD		R6, R6, #-4
 			;检查栈上溢
-			LDR 	R5, Nstackmax
+			LD 		R5, Nstackmax
 			ADD		R5, R5, R6
 			BRn 	funcOF
 
@@ -110,10 +109,12 @@ func 		ADD		R6, R6, #-4
 			STR 	R7, R6, #3
 
 			GETC
+			;OUT
 
 			;t = GETC() - '0' + a + b + c + d + e + f
-			LD 		R5, Nchar0
-			ADD		R0, R0, R5
+			ADD		R0, R0, #-16
+			ADD		R0, R0, #-16
+			ADD		R0, R0, #-16
 			ADD		R0, R0, R1
 			ADD		R0, R0, R2
 			ADD		R0, R0, R3
@@ -143,6 +144,8 @@ func 		ADD		R6, R6, #-4
 			STR 	R0, R6, #2
 			ADD		R0, R0, #-1
 
+			LDR 	R0, R6, #0
+			ADD		R0, R0, #-2
 			;计算y
 			JSR 	func
 			;判断溢出
@@ -150,16 +153,16 @@ func 		ADD		R6, R6, #-4
 			BRnp	funcXF
 
 			;x+y+t-1
-			LDR		R5, R6, #2
-			ADD		R0, R0, R5
 			LDR		R5, R6, #1
+			ADD		R0, R0, R5
+			LDR		R5, R6, #2
 			ADD		R0, R0, R5
 			ADD		R0, R0, #-1
 
 return		LDR 	R7, R6, #3
 			ADD		R6, R6, #4
 			;检查栈下溢
-			LDR 	R5, Nstackinit
+			LD 		R5, Nstackinit
 			ADD		R5, R5, R6
 			BRp 	funcUF
 			

@@ -32,6 +32,8 @@ fun assemble(input: File, output: File) {
         //格式化
         val insts = format(fin.readLines().toTypedArray())
 
+        fin.close()
+
         //创建符号链接表
         val index = createSymbolTable(insts)
 
@@ -43,7 +45,7 @@ fun assemble(input: File, output: File) {
                 .forEach {
                     out.writeShort(it.toInt())
                 }
-        out.flush()
+        out.close()
     } catch (e: AssemblyException) {
         println(e.message)
     }

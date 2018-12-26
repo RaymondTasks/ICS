@@ -1,0 +1,16 @@
+//Symbol Name		Page Address
+//----------------	------------
+//	Nstackinit              3005
+//	Nstackmax               3006
+//	func                    3037
+//	funcOF                  3066
+//	funcUF                  306A
+//	funcXF                  3063
+//	main                    3007
+//	mainOF                  3030
+//	mainUF                  3034
+//	mainXF                  3029
+//	return                  305C
+//	stackinit               3003
+//	stackmax                3004
+//	start                   3000

@@ -1,37 +1,30 @@
 package Simulator
 
-import java.io.DataInputStream
-import java.io.EOFException
-
 /**
  * 初始化
- * @param input obj文件数据流
+ * @param startPC 程序起始点
+ * @param insts obj文件数据流去掉PC头
  */
-fun init(input: DataInputStream) {
-    PC = input.readShort().toInt()
-    var addr = PC
-    while (true) {
-        val s: Int
-        try {
-            s = input.readShort().toInt()
-        } catch (e: EOFException) {
-            break
-        }
-        M[addr++] = s
-    }
+fun init(startPC: Int, insts: IntArray) {
+    PC = startPC
+    System.arraycopy(insts, 0, M, startPC, insts.size)
+    inputIndex = 0
+    output.clear()
 }
 
 /**
  * 开始执行
  * @return 执行到HALT是的总cost
  */
-fun start(): Int {
+fun start(startPC: Int): Int {
     var cost = 0
+    output.clear()
+    PC = startPC
     while (true) {
         if (PC in breakPoints) {
             break
         }
-        if (M[PC] and 0b1_111_111_111_111_111 == 0xF025) {  //HALT
+        if (M[PC] == 0xFFFFF025.toInt()) {  //HALT
             break
         }
 //        if (M[PC] and 0b1_111_111_111_111_111 == 0xC1C0) {  //RET
@@ -41,9 +34,8 @@ fun start(): Int {
 //                "exec x${M[PC].toString(16).toUpperCase()}")
         try {
             cost += exec(M[PC])
-        } catch (e: Exception) {
+        } catch (e: RTIException) {
             e.printStackTrace()
-            print(e.message)
             break
         }
     }
@@ -106,12 +98,12 @@ fun exec(inst: Int): Int {
             }
         }
         //JMP
-        0b1100 -> PC = R[R2]
+        0b1100 -> PC = getMemAddr(R[R2])
         //JSR & JSRR
         0b0100 -> {
-            R[7] = PC + 1
+            R[7] = PC
             PC = when ((inst ushr 11) and 1) {
-                0 -> R[R2]
+                0 -> getMemAddr(R[R2])
                 else -> PC + getImm(inst, 11)
             }
         }
@@ -124,7 +116,7 @@ fun exec(inst: Int): Int {
                 PSR = M[R[6]]
                 R[6]++
             }
-            else -> throw Exception("RTI exception")
+            else -> throw RTIException()
         }
         //LD
         0b0010 -> {
@@ -142,11 +134,11 @@ fun exec(inst: Int): Int {
         0b1011 -> M[M[PC + getImm(inst, 9)]] = R[R1]
         //LDR
         0b0110 -> {
-            R[R1] = M[R[R2] + getImm(inst, 6)]
+            R[R1] = M[getMemAddr(R[R2]) + getImm(inst, 6)]
             updateNZP(R[R1])
         }
         //STR
-        0b0111 -> M[R[R2] + getImm(inst, 6)] = R[R1]
+        0b0111 -> M[getMemAddr(R[R2]) + getImm(inst, 6)] = R[R1]
         //LEA
         0b1110 -> {
             R[R1] = PC + getImm(inst, 9)
@@ -155,9 +147,10 @@ fun exec(inst: Int): Int {
         //TRAP
         0b1111 -> {
             //TRAP的cost单独计算
+            //TRAP调用原子化
             val trapVector = inst and 0b11_111_111
-            R[7] = PC + 1
-            PC = M[trapVector]
+            R[7] = PC
+//            PC = M[trapVector]
             return trap(trapVector) + costTable[0b1111] as Int
         }
 
@@ -165,6 +158,10 @@ fun exec(inst: Int): Int {
 
     return costTable[op] as Int
 
+}
+
+fun getMemAddr(regData: Int): Int {
+    return ((-1) ushr 16) and regData
 }
 
 /**
@@ -179,6 +176,7 @@ fun getImm(inst: Int, length: Int): Int {
         else -> (-1) shl length
     }
     imm += inst and ((-1) ushr (Int.SIZE_BITS - length))
+//    println("imm = $imm")
     return imm
 }
 
@@ -201,22 +199,56 @@ fun updateNZP(num: Int) {
  */
 fun trap(trapVector: Int): Int {
     when (trapVector) {
-        0x21 -> {
-
+        0x20 -> {   //GETC
+            R[0] = input[inputIndex++].toInt()
+            return 28
         }
-        0x22 -> {
-
+        0x21 -> {   //OUT
+            output.add(R[0].toChar())
+            return 36
         }
-        0x23 -> {
-
+        0x22 -> {   //PUTS
+            var addr = R[0]
+            var c = M[addr]
+            while (c != 0) {
+                output.add(c.toChar())
+                addr++
+                c = M[addr]
+            }
+            return 4 * 4 + 27 * (addr - R[0]) + 6 + 4 * 4 + 2
         }
-        0x24 -> {
-
+        else -> {
+            //todo 待完成
+            throw Exception("Unfinished")
         }
-        0x25 -> {
-
-        }
+//        0x23 -> {   //IN
+//
+//        }
+//        0x24 -> {   //PUTSP
+//
+//        }
+//        0x25 -> {   //HALT
+//
+//        }
     }
+}
+
+lateinit var input: ArrayList<Char>
+var inputIndex = 0
+
+fun setInputChars(inputChars: ArrayList<Char>) {
+    input = inputChars
+    inputIndex = 0
+}
+
+val output = ArrayList<Char>()
+
+fun getOutputChars(): String {
+    return String(output.toCharArray())
+}
+
+fun addBreakPoint(addr: Int) {
+    breakPoints.add(addr)
 }
 
 //指令cost列表
@@ -239,5 +271,7 @@ val costTable = hashMapOf(
         Pair(0b1010, 8),    //LDI
         Pair(0b1011, 8),    //STI
 
-        Pair(0b1000, 8) //todo RTI?
+        Pair(0b1000, 8)     //RTI
 )
+
+class RTIException : Exception()
