@@ -6,7 +6,7 @@ Labs
 
 - Lab1 completed
 
-- Lab2 ongoing
+- Lab2 completed
 
 - Lab3
 
@@ -16,4 +16,4 @@ Labs
 
 Assembler (completed)
 
-Simulator (ongoing)
+Simulator (completed)

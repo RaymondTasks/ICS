@@ -3,7 +3,11 @@ package Simulator
 import java.io.*
 import kotlin.random.Random
 
-fun lab1Test() {
+
+/**
+ * lab1的测试程序
+ */
+fun main(args: Array<String>) {
     val fin = DataInputStream(
             BufferedInputStream(
                     FileInputStream(

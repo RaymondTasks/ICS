@@ -4,57 +4,72 @@ import Assembler.assemble
 import java.io.*
 import kotlin.random.Random
 
-fun lab2Test() {
+
+/**
+ * lab2的测试程序
+ */
+fun main(args: Array<String>) {
     val asmFile = File("D:\\Codes\\ICS\\labs\\lab2\\program.asm")
     val objFile = File("D:\\Codes\\ICS\\labs\\lab2\\program2.obj")
+//    val objFile = File("C:\\Users\\rayomnd\\Desktop\\lab2.obj")
 
     assemble(asmFile, objFile)
 
-    val fin = DataInputStream(
-            BufferedInputStream(
-                    FileInputStream(objFile)))
     val insts = ArrayList<Int>()
-    fin.readShort()
-    while (true) {
+    DataInputStream(
+            BufferedInputStream(
+                    FileInputStream(objFile))).apply {
+        readShort()
         try {
-            insts.add(fin.readShort().toInt())
+            while (true) {
+                insts.add(readShort().toInt())
+            }
         } catch (e: EOFException) {
-            fin.close()
-            break
+            close()
         }
     }
+
     val initArr = insts.toIntArray()
 
     var allCost = 0.0
-    val testNum = 10000
+    val testNum = 100
 
-    for (count in 1..testNum) {
-        val startPC = Random.nextInt(0x3000, 0xC001)
-        init(startPC, initArr)
+    for (end in 48..80) {
+        startAscii=0
+        endAscii=end
+        for (count in 1..testNum) {
+            val startPC = Random.nextInt(0x3000, 0xC001)
+            init(startPC, initArr)
 
-        inputChars.clear()
-        val answer = lab2Main()
-        setInputChars(inputChars)
+            inputChars.clear()
+            val answer = lab2Main()
+            setInputChars(inputChars)
 
-        allCost += start(startPC)
+            allCost += start(startPC)
 
-        when (R[5]) {
-            0 -> {
-                if (R[0].toShort() == answer) {
-//                    println("pass")
-                } else {
-                    println("filed")
-                    return
+            when (PC) {
+                //如果没有发生栈溢出，则在起始位置+2的地方遇到HALT
+                startPC + 2 -> {
+                    if (R[0].toShort() != answer) {
+                        println("char < $endAscii, failed")
+                        return
+                    }
+                }
+                //发生了栈溢出
+                else -> {
+                    println("stack overflow or underflow")
                 }
             }
-            1 -> println("overflow")
-            2 -> println("underflow")
         }
+
+        println("char < $endAscii, pass, avg = ${allCost / testNum}")
     }
 
-    println("avg = ${allCost / testNum}")
 
 }
+
+//标准程序输入的字符流，相同的字符流传递给模拟程序
+val inputChars = ArrayList<Char>()
 
 
 fun lab2Main(): Short {
@@ -75,11 +90,13 @@ fun lab2Func(n: Short, a: Short, b: Short, c: Short,
     }
 }
 
-val inputChars = ArrayList<Char>()
+var startAscii=48
+var endAscii = 58
 
 fun lab2GETC(): Short {
 //    val c = Random.nextInt(0, 128).toChar()
-    val c = Random.nextInt(48, 58).toChar()
+//    val c = Random.nextInt(48, 58).toChar()
+    val c = Random.nextInt(startAscii, endAscii).toChar()
     inputChars.add(c)
     return c.toShort()
 }
