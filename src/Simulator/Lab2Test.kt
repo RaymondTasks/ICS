@@ -1,6 +1,5 @@
 package Simulator
 
-import Assembler.assemble
 import java.io.*
 import kotlin.random.Random
 
@@ -9,11 +8,11 @@ import kotlin.random.Random
  * lab2的测试程序
  */
 fun main(args: Array<String>) {
-    val asmFile = File("D:\\Codes\\ICS\\labs\\lab2\\program.asm")
-    val objFile = File("D:\\Codes\\ICS\\labs\\lab2\\program2.obj")
-//    val objFile = File("C:\\Users\\rayomnd\\Desktop\\lab2.obj")
 
-    assemble(asmFile, objFile)
+//    val asmFile = File("D:\\Codes\\ICS\\labs\\lab2\\program.asm")
+    val objFile = File("D:\\Codes\\ICS\\labs\\lab2\\program2.obj")
+
+//    assemble(asmFile, objFile)
 
     val insts = ArrayList<Int>()
     DataInputStream(
@@ -35,8 +34,8 @@ fun main(args: Array<String>) {
     val testNum = 100
 
     for (end in 48..80) {
-        startAscii=0
-        endAscii=end
+        startAscii = 0
+        endAscii = end
         for (count in 1..testNum) {
             val startPC = Random.nextInt(0x3000, 0xC001)
             init(startPC, initArr)
@@ -90,7 +89,7 @@ fun lab2Func(n: Short, a: Short, b: Short, c: Short,
     }
 }
 
-var startAscii=48
+var startAscii = 48
 var endAscii = 58
 
 fun lab2GETC(): Short {

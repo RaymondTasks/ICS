@@ -1,0 +1,21 @@
+//Symbol Name		Page Address
+//----------------	------------
+//	GLOBAL_DATA_POINTER     300C
+//	GLOBAL_MAIN_POINTER     300D
+//	INIT_CODE               3000
+//	L1_lab2                 30F0
+//	L2_lab2                 30F6
+//	L3_lab2                 30EF
+//	L5_lab2                 30F5
+//	L6_lab2                 30F4
+//	L7                      303E
+//	L8_lab2                 30F1
+//	L9_lab2                 30F3
+//	func                    30EE
+//	getchar                 30F2
+//	lc3_L1_lab2             30A7
+//	lc3_L3_lab2             30A6
+//	lc3_L8_lab2             30DE
+//	lc3_func                300E
+//	lc3_getchar             30E5
+//	main                    30AE
