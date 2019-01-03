@@ -16,8 +16,8 @@ fun init(startPC: Int, insts: IntArray) {
  * 开始执行
  * @return 执行到HALT是的总cost
  */
-fun start(startPC: Int): Int {
-    var cost = 0
+fun start(startPC: Int): Long {
+    var cost = 0L
     output.clear()
     PC = startPC
     while (true) {
@@ -101,11 +101,12 @@ fun exec(inst: Int): Int {
         0b1100 -> PC = getMemAddr(R[R2])
         //JSR & JSRR
         0b0100 -> {
-            R[7] = PC
+            val tmp= PC
             PC = when ((inst ushr 11) and 1) {
                 0 -> getMemAddr(R[R2])
                 else -> PC + getImm(inst, 11)
             }
+            R[7]=tmp
         }
         //RTI
         0b1000 -> when ((PSR ushr 15) and 1) {

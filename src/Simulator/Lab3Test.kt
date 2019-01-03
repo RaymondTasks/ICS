@@ -1,7 +1,6 @@
 package Simulator
 
 import java.io.*
-import kotlin.random.Random
 
 /**
  * 部分函数直接调用lab2
@@ -9,7 +8,9 @@ import kotlin.random.Random
 
 fun main(args: Array<String>) {
 
-    val objFile = File("C:\\Users\\rayomnd\\Desktop\\lab2.obj")
+    val objFile = File("D:\\Codes\\ICS\\labs\\lab3\\program.obj")
+//    val objFile = File("D:\\Codes\\ICS\\labs\\lab3\\program_original.obj")
+//    val objFile = File("C:\\Users\\rayomnd\\Desktop\\lab3.obj")
 
     val insts = ArrayList<Int>()
     DataInputStream(
@@ -27,30 +28,31 @@ fun main(args: Array<String>) {
 
     val initArr = insts.toIntArray()
 
-    var allCost = 0.0
+    var allCost = 0L
     val testNum = 100
 
-    for (end in 48..80) {
+    for (end in 48..85) {
         startAscii = 0
         endAscii = end
         for (count in 1..testNum) {
-            val startPC = Random.nextInt(0x3000, 0xC001)
-            init(startPC, initArr)
+            init(0x3000, initArr)
 
             inputChars.clear()
+            System.gc()     //防止爆内存
+
             val answer = lab2Main()
             setInputChars(inputChars)
 
-            allCost += start(startPC)
+            allCost += start(0x3000)
 
-            if (R[0].toShort() != answer) {
-                println("char < $endAscii, failed")
+            if (M[R[6]].toShort() != answer) {
+                println("char < $end, failed")
                 return
             }
 
         }
 
-        println("char < $endAscii, pass, avg = ${allCost / testNum}")
+        println("char < $end, pass, avg = ${allCost.toDouble() / testNum}")
     }
 
 

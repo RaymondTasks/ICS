@@ -10,7 +10,7 @@ import kotlin.random.Random
 fun main(args: Array<String>) {
 
 //    val asmFile = File("D:\\Codes\\ICS\\labs\\lab2\\program.asm")
-    val objFile = File("D:\\Codes\\ICS\\labs\\lab2\\program2.obj")
+    val objFile = File("D:\\Codes\\ICS\\labs\\lab2\\program.obj")
 
 //    assemble(asmFile, objFile)
 
@@ -30,10 +30,10 @@ fun main(args: Array<String>) {
 
     val initArr = insts.toIntArray()
 
-    var allCost = 0.0
+    var allCost = 0L
     val testNum = 100
 
-    for (end in 48..80) {
+    for (end in 48..85) {
         startAscii = 0
         endAscii = end
         for (count in 1..testNum) {
@@ -41,6 +41,8 @@ fun main(args: Array<String>) {
             init(startPC, initArr)
 
             inputChars.clear()
+            System.gc()     //防止爆内存
+
             val answer = lab2Main()
             setInputChars(inputChars)
 
@@ -50,7 +52,7 @@ fun main(args: Array<String>) {
                 //如果没有发生栈溢出，则在起始位置+2的地方遇到HALT
                 startPC + 2 -> {
                     if (R[0].toShort() != answer) {
-                        println("char < $endAscii, failed")
+                        println("char < $end, failed")
                         return
                     }
                 }
@@ -61,7 +63,7 @@ fun main(args: Array<String>) {
             }
         }
 
-        println("char < $endAscii, pass, avg = ${allCost / testNum}")
+        println("char < $end, pass, avg = ${allCost.toDouble() / testNum}")
     }
 
 

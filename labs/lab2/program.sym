@@ -2,15 +2,11 @@
 //----------------	------------
 //	Nstackinit              3005
 //	Nstackmax               3006
-//	func                    3037
-//	funcOF                  3066
-//	funcUF                  306A
-//	funcXF                  3063
+//	func                    3029
+//	funcFlow                3053
 //	main                    3007
-//	mainOF                  3030
-//	mainUF                  3034
-//	mainXF                  3029
-//	return                  305C
+//	mainFlow                3028
+//	return                  304C
 //	stackinit               3003
 //	stackmax                3004
 //	start                   3000

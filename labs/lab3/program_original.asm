@@ -13,7 +13,7 @@ LD R7, GLOBAL_MAIN_POINTER
 jsrr R7
 HALT
 
-GLOBAL_DATA_POINTER .FILL GLOBAL_DATA_START
+GLOBAL_DATA_POINTER .FILL func
 GLOBAL_MAIN_POINTER .FILL main
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;func;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 lc3_func
@@ -256,7 +256,6 @@ LDR R7, R6, #-3
 ADD R6, R6, #-1
 RET
 
-GLOBAL_DATA_START
 func .FILL lc3_func
 L3_lab2 .FILL lc3_L3_lab2
 L1_lab2 .FILL lc3_L1_lab2
