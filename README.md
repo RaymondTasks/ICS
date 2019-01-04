@@ -8,7 +8,7 @@ Labs
 
 - Lab2 completed
 
-- Lab3 ongoing
+- Lab3 completed
 
 - Lab4
 
