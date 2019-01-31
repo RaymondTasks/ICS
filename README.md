@@ -10,10 +10,6 @@ Labs
 
 - Lab3 completed
 
-- Lab4
-
-- Lab5
-
 Assembler (completed)
 
 Simulator (completed)
